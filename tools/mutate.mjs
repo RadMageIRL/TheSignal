@@ -182,6 +182,7 @@ const M = [
   ["Labs rewrite load never compared", "tools/monitor.ts", "      if (extra > 2 * baseline.labsRewriteRequestsPerDay) {", "      if (false) {"],
   ["Labs daily usage compared on a short window", "tools/monitor.ts", "    if (hours < 24) { /* reported, not compared */ }", "    if (false) { /* reported, not compared */ }"],
   ["Labs cache miss not flagged", "tools/monitor.ts", "  if (labs.cached === false) {", "  if (false) {"],
+  ["weak ETag passed to conditional writes", "ingest/blob.ts", "etag: strongEtag(r.blob.etag)", "etag: r.blob.etag"],
   ["Labs usage counts every service as requests", "tools/monitor.ts", "filter((x) => x.product === 'edgeRequest')", "filter(() => true)"],
 ];
 

@@ -32,11 +32,21 @@ export const PATHS = {
   ops: 'ops/',
 } as const;
 
+/**
+ * The strong form of an ETag. The store answers a read that it sends compressed (the collector
+ * state, about half a megabyte) with the weak form W/"x" of the version's ETag "x", but a
+ * conditional write (ifMatch) compares strong ETags, so the weak form never matches. The tag
+ * still belongs to the version this read returned, so the write stays conditional on exactly it.
+ */
+export function strongEtag(etag: string): string {
+  return etag.startsWith('W/') ? etag.slice(2) : etag;
+}
+
 /** Reads a private blob, bypassing the CDN cache so an overwrite or a deletion is seen at once. */
 export async function readPrivate(pathname: string, auth: BlobAuth): Promise<{ text: string; etag: string } | null> {
   const r = await get(pathname, { access: 'private', useCache: false, ...auth });
   if (!r || r.statusCode !== 200) return null;
-  return { text: await new Response(r.stream).text(), etag: r.blob.etag };
+  return { text: await new Response(r.stream).text(), etag: strongEtag(r.blob.etag) };
 }
 
 export class StateConflictError extends Error {

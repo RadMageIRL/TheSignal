@@ -24,17 +24,20 @@ vi.mock('@vercel/blob', () => ({
     m.set(path, { body: String(body), etag, opts: o });
     return { url: `https://store.example/${path}`, pathname: path, etag };
   },
+  // Like the real store: a read large enough to be sent compressed carries the weak form of the
+  // same ETag (W/"x"), while conditional writes compare against the strong form ("x").
   get: async (path: string, o: { token?: string }) => {
     const cur = blob.pick(o).get(path);
     if (!cur) return null;
-    return { statusCode: 200, stream: new Response(cur.body).body, headers: new Headers(), blob: { etag: cur.etag, url: '', pathname: path } };
+    const etag = cur.body.length > 1024 ? `W/${cur.etag}` : cur.etag;
+    return { statusCode: 200, stream: new Response(cur.body).body, headers: new Headers(), blob: { etag, url: '', pathname: path } };
   },
   list: async (o: { token?: string; prefix: string }) => ({ blobs: [...blob.pick(o).keys()].filter((k) => k.startsWith(o.prefix)).map((pathname) => ({ pathname })), hasMore: false }),
   del: async (paths: string | string[], o: { token?: string }) => { for (const p of ([] as string[]).concat(paths)) blob.pick(o).delete(p); },
 }));
 
 const { productionRun } = await import('../../ingest/production.ts');
-const { BlobSiteStore, blobAuth, pruneOpsLogs } = await import('../../ingest/blob.ts');
+const { BlobSiteStore, blobAuth, pruneOpsLogs, strongEtag } = await import('../../ingest/blob.ts');
 const { rollback, summarize } = await import('../../tools/ops.ts');
 const { GET } = await import('../../api/collect.ts');
 
@@ -139,6 +142,35 @@ describe('a production run', () => {
     expect(statuses).toEqual(['publish', 'suspended']);
     expect([ra, rb].find((r) => r.status === 'suspended')!.reasons[0]).toMatch(/another run/);
     expect(Math.min(a.feeds(), b.feeds())).toBe(0);
+  });
+
+  it('saves the next run reservations after the store answers the state read with a weak ETag', async () => {
+    ready();
+    const n = net();
+    await productionRun(ENV, fixtureSources(), deps(n, T0));
+    expect(blob.stores.priv.get('state/state.json')!.body.length).toBeGreaterThan(1024);
+    const r = await productionRun(ENV, fixtureSources(), deps(n, T0 + 15 * 60_000));
+    expect(r.status).toBe('publish');
+    expect(r.reasons.join(' ')).not.toMatch(/reservations could not be saved/);
+  });
+
+  it('still lets only one of two overlapping later runs go ahead when both read a weak ETag', async () => {
+    ready();
+    await productionRun(ENV, fixtureSources(), deps(net(), T0));
+    const a = net();
+    const b = net();
+    const t = T0 + 60 * 60_000;
+    const [ra, rb] = await Promise.all([productionRun(ENV, fixtureSources(), deps(a, t)), productionRun(ENV, fixtureSources(), deps(b, t))]);
+    expect([ra.status, rb.status].filter((s) => s === 'suspended')).toHaveLength(1);
+    expect([ra, rb].find((r) => r.status === 'suspended')!.reasons[0]).toMatch(/another run/);
+    expect(Math.min(a.feeds(), b.feeds())).toBe(0);
+  });
+});
+
+describe('the strong form of an ETag', () => {
+  it('drops the weak marker and leaves a strong ETag as it is', () => {
+    expect(strongEtag('W/"09f3"')).toBe('"09f3"');
+    expect(strongEtag('"09f3"')).toBe('"09f3"');
   });
 });
 
