@@ -4,8 +4,8 @@ One world. Many perspectives. Draw your own conclusions.
 
 The Signal is a news front page that collects headlines from newsrooms, public institutions, independent outlets,
 podcasts and public communities around the world, groups the ones about the same story, and links every headline
-straight to its publisher. It is planned for [radmagelabs.com/signal/](https://radmagelabs.com/signal/) as part of
-RadMage Labs.
+straight to its publisher. It is live at [radmagelabs.com/signal/](https://radmagelabs.com/signal/) as part of RadMage
+Labs.
 
 > The Signal is built in the spirit of the open internet. We believe information should be discoverable, perspectives
 > should be accessible, and readers should be free to draw their own conclusions. Our purpose is to connect people with
@@ -15,8 +15,8 @@ All signal. No noise.
 
 ## Status
 
-In development. Nothing is deployed and nothing has been released. The site, its collector and its RSS feeds are not
-public yet; the version in `package.json` stays at 0.0.0 until the first release (planned as v0.1.0).
+v0.1.0, released 2026-11-22: the site, its collector and its RSS feeds are public at
+[radmagelabs.com/signal/](https://radmagelabs.com/signal/). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## What it shows
 

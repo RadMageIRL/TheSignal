@@ -1,8 +1,10 @@
 # Changelog
 
-All notable changes to The Signal are recorded here. Nothing has been released yet.
+All notable changes to The Signal are recorded here.
 
-## Unreleased
+## 0.1.0 (2026-11-22)
+
+First public release, at https://radmagelabs.com/signal/.
 
 ### Added
 
@@ -47,6 +49,8 @@ All notable changes to The Signal are recorded here. Nothing has been released y
 - Security headers, including a Content-Security-Policy with no inline exceptions beyond the hashed theme script; the
   browser tests run under it.
 - A privacy section on the methodology page.
+- Link-preview metadata (Open Graph and Twitter card) for radmagelabs.com/signal/, and a robots.txt that keeps the
+  project's own Vercel address out of search indexes.
 
 ### Changed
 
