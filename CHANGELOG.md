@@ -48,6 +48,11 @@ All notable changes to The Signal are recorded here. Nothing has been released y
 
 ### Changed
 
+- robots.txt is read more strictly than RFC 9309 requires: only a robots file, or a 404 or 410 from the site's own
+  host, is an answer. A refused file, a redirect to a missing file on another host, or an HTML page in place of
+  robots.txt is treated as disallowing everything. Six sources whose robots.txt cannot be evaluated this way are held.
+- The nine The Conversation editions and Tech Policy Press are polled every 120 minutes instead of every 30: their
+  full-text feeds offer no conditional requests.
 - Global Perspectives says why it is empty instead of disappearing when no story has headlines from three or more
   countries.
 - ECB items that bear their authors' names (speeches, interviews, blog posts, press conference transcripts) are left

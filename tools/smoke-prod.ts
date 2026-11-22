@@ -20,7 +20,16 @@ import { isEnglish } from '../shared/languages.ts';
 
 export interface Check { name: string; ok: boolean; detail: string }
 
-type Get = (url: string, init?: RequestInit) => Promise<Response>;
+export type Get = (url: string, init?: RequestInit) => Promise<Response>;
+
+/** The only way these tools reach the network: the site under test (and its collector endpoint), never a publisher. */
+export function siteGet(base: string, apiUrl?: string): Get {
+  const allowed = new Set([new URL(base).origin, ...(apiUrl ? [new URL(apiUrl).origin] : [])]);
+  return (u, i) => {
+    if (!allowed.has(new URL(u).origin)) throw new Error(`refusing ${u}: not the site under test`);
+    return fetch(u, { ...i, redirect: 'manual' });
+  };
+}
 
 export async function smokeChecks(base: string, opts: { get: Get; registry: SourceEntry[]; maxAgeMin: number; apiUrl?: string; now?: number }): Promise<Check[]> {
   const out: Check[] = [];
@@ -84,13 +93,7 @@ if (isMain) {
   if (!base || !base.endsWith('/')) { console.error('usage: node tools/smoke-prod.ts --base https://host/signal/'); process.exit(1); }
   const registry = JSON.parse(readFileSync('registry/sources.json', 'utf8')) as SourceEntry[];
   const apiUrl = opt('--api');
-  // Only the site under test (and its collector endpoint) is ever requested, never a publisher.
-  const allowed = new Set([new URL(base).origin, ...(apiUrl ? [new URL(apiUrl).origin] : [])]);
-  const get: Get = (u, i) => {
-    if (!allowed.has(new URL(u).origin)) throw new Error(`refusing ${u}: not the site under test`);
-    return fetch(u, { ...i, redirect: 'manual' });
-  };
-  const checks = await smokeChecks(base, { get, registry, maxAgeMin: Number(opt('--max-age-min', '45')), apiUrl });
+  const checks = await smokeChecks(base, { get: siteGet(base, apiUrl), registry, maxAgeMin: Number(opt('--max-age-min', '45')), apiUrl });
   for (const c of checks) console.log(`${c.ok ? 'ok  ' : 'FAIL'} ${c.name}${c.detail ? `  (${c.detail})` : ''}`);
   const failed = checks.filter((c) => !c.ok).length;
   console.log(failed === 0 ? `all ${checks.length} checks passed` : `${failed} of ${checks.length} checks failed`);

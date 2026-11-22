@@ -4893,15 +4893,14 @@
    {
     "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia.org/all-access/{Y}/{M}/{D}",
     "kind": "wikipedia-top",
-    "subsection": "reading",
-    "redirectHosts": [
-     "www.wikimedia.org"
-    ]
+    "subsection": "reading"
    }
   ],
-  "status": "READY",
-  "statusNote": "Pageview data is CC0 (\"Data provided by the API is available under the CC0 1.0 license\"). User-Agent policy satisfied by the declared identity (website and contact email).",
-  "gates": [],
+  "status": "CONDITIONAL",
+  "statusNote": "Pageview data is CC0 (\"Data provided by the API is available under the CC0 1.0 license\"). User-Agent policy satisfied by the declared identity (website and contact email). Held 2026-11-22: its robots.txt cannot be reliably evaluated (see gates).",
+  "gates": [
+   "robots.txt cannot be reliably evaluated (wikimedia.org redirects robots.txt to a missing file on www.wikimedia.org, 2026-11-22): held until it can be read and allows the feed"
+  ],
   "termsUrl": "https://wikitech.wikimedia.org/wiki/Data_Platform/AQS/Pageviews",
   "attribution": "none required (pageview data are CC0)",
   "rights": {
@@ -4911,7 +4910,7 @@
    "images": "unknown"
   },
   "restrictions": "",
-  "enabled": true,
+  "enabled": false,
   "reviewed": "2026-11-22"
  },
  {
@@ -5035,9 +5034,11 @@
     "subsection": "podcasts"
    }
   ],
-  "status": "READY",
-  "statusNote": "Directory feed; no restricting terms.",
-  "gates": [],
+  "status": "CONDITIONAL",
+  "statusNote": "Directory feed; no restricting terms. Held 2026-11-22: its robots.txt cannot be reliably evaluated (see gates).",
+  "gates": [
+   "robots.txt cannot be reliably evaluated (rss.libsyn.com answers HTTP 403 for robots.txt, 2026-11-22): held until it can be read and allows the feed"
+  ],
   "termsUrl": "",
   "attribution": "none stated",
   "rights": {
@@ -5047,7 +5048,7 @@
    "images": "unknown"
   },
   "restrictions": "",
-  "enabled": true,
+  "enabled": false,
   "reviewed": "2026-11-22"
  },
  {
@@ -5273,9 +5274,11 @@
     "subsection": "podcasts"
    }
   ],
-  "status": "READY",
-  "statusNote": "Directory feed; no restricting terms.",
-  "gates": [],
+  "status": "CONDITIONAL",
+  "statusNote": "Directory feed; no restricting terms. Held 2026-11-22: its robots.txt cannot be reliably evaluated (see gates).",
+  "gates": [
+   "robots.txt cannot be reliably evaluated (rss.libsyn.com answers HTTP 403 for robots.txt, 2026-11-22): held until it can be read and allows the feed"
+  ],
   "termsUrl": "",
   "attribution": "none stated",
   "rights": {
@@ -5285,7 +5288,7 @@
    "images": "unknown"
   },
   "restrictions": "",
-  "enabled": true,
+  "enabled": false,
   "reviewed": "2026-11-22"
  },
  {
@@ -5310,9 +5313,11 @@
     ]
    }
   ],
-  "status": "READY",
-  "statusNote": "Directory feed; no restricting terms.",
-  "gates": [],
+  "status": "CONDITIONAL",
+  "statusNote": "Directory feed; no restricting terms. Held 2026-11-22: its robots.txt cannot be reliably evaluated (see gates).",
+  "gates": [
+   "robots.txt cannot be reliably evaluated (the feed redirects to rss.libsyn.com, which answers HTTP 403 for robots.txt, 2026-11-22): held until it can be read and allows the feed"
+  ],
   "termsUrl": "",
   "attribution": "none stated",
   "rights": {
@@ -5322,7 +5327,7 @@
    "images": "unknown"
   },
   "restrictions": "",
-  "enabled": true,
+  "enabled": false,
   "reviewed": "2026-11-22"
  },
  {
@@ -5718,9 +5723,11 @@
     "subsection": "podcasts"
    }
   ],
-  "status": "READY",
-  "statusNote": "Directory feed; no restricting terms.",
-  "gates": [],
+  "status": "CONDITIONAL",
+  "statusNote": "Directory feed; no restricting terms. Held 2026-11-22: its robots.txt cannot be reliably evaluated (see gates).",
+  "gates": [
+   "robots.txt cannot be reliably evaluated (rss.libsyn.com answers HTTP 403 for robots.txt, 2026-11-22): held until it can be read and allows the feed"
+  ],
   "termsUrl": "",
   "attribution": "none stated",
   "rights": {
@@ -5730,7 +5737,7 @@
    "images": "unknown"
   },
   "restrictions": "",
-  "enabled": true,
+  "enabled": false,
   "reviewed": "2026-11-22"
  },
  {
@@ -9455,9 +9462,11 @@
     "subsection": "tech"
    }
   ],
-  "status": "READY",
-  "statusNote": "A broad sitewide CC BY-NC-SA grant.",
-  "gates": [],
+  "status": "CONDITIONAL",
+  "statusNote": "A broad sitewide CC BY-NC-SA grant. Held 2026-11-22: its robots.txt cannot be reliably evaluated (see gates).",
+  "gates": [
+   "robots.txt cannot be reliably evaluated (www.niemanlab.org answers HTTP 403 for robots.txt, 2026-11-22): held until it can be read and allows the feed"
+  ],
   "termsUrl": "https://www.niemanlab.org/about/",
   "attribution": "Nieman Journalism Lab and/or the author, \"preferably with a link back to the original content\".",
   "rights": {
@@ -9467,7 +9476,7 @@
    "images": "unknown"
   },
   "restrictions": "non-commercial; ShareAlike for derived works; \"unless otherwise noted\".",
-  "enabled": true,
+  "enabled": false,
   "reviewed": "2026-11-22"
  },
  {
@@ -10326,7 +10335,7 @@
   "contentType": "mixed",
   "affiliation": "nonprofit",
   "ownership": "Tech Policy Press",
-  "intervalMinutes": 30,
+  "intervalMinutes": 120,
   "feeds": [
    {
     "url": "https://www.techpolicy.press/rss/feed.xml",
@@ -10422,7 +10431,7 @@
   "contentType": "commentary",
   "affiliation": "nonprofit",
   "ownership": "The Conversation Trust (UK) (not confirmed)",
-  "intervalMinutes": 30,
+  "intervalMinutes": 120,
   "feeds": [
    {
     "url": "https://theconversation.com/uk/articles.atom",
@@ -10457,7 +10466,7 @@
   "contentType": "commentary",
   "affiliation": "nonprofit",
   "ownership": "The Conversation Media Group Ltd (not confirmed)",
-  "intervalMinutes": 30,
+  "intervalMinutes": 120,
   "feeds": [
    {
     "url": "https://theconversation.com/au/articles.atom",
@@ -10492,7 +10501,7 @@
   "contentType": "commentary",
   "affiliation": "nonprofit",
   "ownership": "The Conversation Africa (not confirmed)",
-  "intervalMinutes": 30,
+  "intervalMinutes": 120,
   "feeds": [
    {
     "url": "https://theconversation.com/africa/articles.atom",
@@ -10527,7 +10536,7 @@
   "contentType": "commentary",
   "affiliation": "nonprofit",
   "ownership": "The Conversation Canada (not confirmed)",
-  "intervalMinutes": 30,
+  "intervalMinutes": 120,
   "feeds": [
    {
     "url": "https://theconversation.com/ca/articles.atom",
@@ -10562,7 +10571,7 @@
   "contentType": "commentary",
   "affiliation": "nonprofit",
   "ownership": "served by the Australian edition (not confirmed)",
-  "intervalMinutes": 30,
+  "intervalMinutes": 120,
   "feeds": [
    {
     "url": "https://theconversation.com/nz/articles.atom",
@@ -10597,7 +10606,7 @@
   "contentType": "commentary",
   "affiliation": "nonprofit",
   "ownership": "The Conversation France (not confirmed)",
-  "intervalMinutes": 30,
+  "intervalMinutes": 120,
   "feeds": [
    {
     "url": "https://theconversation.com/fr/articles.atom",
@@ -10632,7 +10641,7 @@
   "contentType": "commentary",
   "affiliation": "nonprofit",
   "ownership": "The Conversation Indonesia (not confirmed)",
-  "intervalMinutes": 30,
+  "intervalMinutes": 120,
   "feeds": [
    {
     "url": "https://theconversation.com/id/articles.atom",
@@ -10667,7 +10676,7 @@
   "contentType": "commentary",
   "affiliation": "nonprofit",
   "ownership": "The Conversation España (not confirmed)",
-  "intervalMinutes": 30,
+  "intervalMinutes": 120,
   "feeds": [
    {
     "url": "https://theconversation.com/es/articles.atom",
@@ -10702,7 +10711,7 @@
   "contentType": "commentary",
   "affiliation": "nonprofit",
   "ownership": "The Conversation Brasil (not confirmed)",
-  "intervalMinutes": 30,
+  "intervalMinutes": 120,
   "feeds": [
    {
     "url": "https://theconversation.com/br/articles.atom",

@@ -7,7 +7,7 @@
 //   node tools/collect-local.ts run --out <dir> [--run <n>]     one collection run
 //   node tools/collect-local.ts audit --out <dir>                check every request so far
 //   node tools/collect-local.ts report --out <dir>               evidence summary (JSON)
-//   node tools/collect-local.ts smoke --out <dir> [--every 15]   the scripted smoke test
+//   node tools/collect-local.ts smoke --out <dir> [--every 15] [--plan short]   the scripted smoke test
 //
 // Only the sources cleared for production (enabled, READY, no gates) are collected, with the
 // declared identity and the production limits. Nothing here is deployed or scheduled.
@@ -172,7 +172,10 @@ export function auditLedger(ledger: LedgerLine[], runs: RunLine[], sources: Sour
       // allowlist) is as unusable as a server error, and RFC 9309 lets the crawler ask again.
       const chain = done.filter((d) => d.run === prev.run && d.url === prev.url && d.sentAt >= prev.sentAt).sort((a, b) => b.sentAt - a.sentAt);
       const st = chain[0]?.status ?? statusOf(prev) ?? 0;
-      const unusable = st === 0 || (st >= 300 && st < 400) || st >= 500 || st === 419 || st === 429 || killed.has(prev.run);
+      // Only a robots file, or a 404 or 410 from the site's own host, is an answer (ingest/robots.ts).
+      const crossHost = chain[0] !== undefined && new URL(chain[0].target).host !== new URL(prev.url).host;
+      const notFound = (st === 404 || st === 410) && !crossHost;
+      const unusable = st === 0 || (st >= 300 && st < 400) || st >= 500 || (st >= 400 && st < 500 && !notFound) || killed.has(prev.run);
       if (!unusable && robots[i]!.sentAt - prev.sentAt < ROBOTS_MAX_AGE_MS) v.push({ rule: 'robots.txt cache', detail: `${o}/robots.txt re-read after ${robots[i]!.sentAt - prev.sentAt} ms` });
     }
   }
@@ -355,7 +358,7 @@ async function smoke(): Promise<void> {
   const t0 = Date.now();
   // The script: normal; immediate restart (refused); drill (publish refused, last good kept);
   // normal; killed mid-run; immediate restart (refused); normal (must honor the killed run's reservations).
-  const plan: { at: number; env?: Record<string, string>; kill?: number; note: string }[] = [
+  const full: { at: number; env?: Record<string, string>; kill?: number; note: string }[] = [
     { at: 0, note: 'first run from empty state' },
     { at: 60_000, note: 'restart one minute later (must be refused before any request)' },
     { at: every, env: { SIGNAL_MIN_ARTICLES: '5000' }, note: 'drill: publish refused, the last good files must stay' },
@@ -364,6 +367,8 @@ async function smoke(): Promise<void> {
     { at: 3 * every + 60_000, note: 'restart after the crash (must be refused before any request)' },
     { at: 4 * every, note: 'normal run after the crash (must honor its reservations)' },
   ];
+  // --plan short: a cold run, an immediate restart, and one scheduled run (a quick check after a change).
+  const plan = opt('--plan') === 'short' ? full.filter((_, i) => i === 0 || i === 1 || i === 3).map((x, i) => (i === 2 ? { ...x, at: every } : x)) : full;
   writeFileSync(join(out, 'plan.json'), JSON.stringify({ startedAt: new Date(t0).toISOString(), everyMs: every, plan }, null, 1));
   for (let i = 0; i < plan.length; i++) {
     const step = plan[i]!;

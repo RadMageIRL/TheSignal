@@ -11,11 +11,15 @@ import { JSON_CONTENT_TYPE, type PublishedFile, type SiteStore } from './storage
 
 export interface BlobAuth { token?: string; storeId?: string }
 
-/** Auth for the store whose env prefix is given: <P>_BLOB_READ_WRITE_TOKEN, else <P>_BLOB_STORE_ID (OIDC). */
+/**
+ * Auth for the store connected with the given env prefix: a read-write token, else the store id
+ * (with the project's OIDC credentials). Connecting a store under a custom prefix names its
+ * variables either <P>_BLOB_... or <P>_..., so both forms are read.
+ */
 export function blobAuth(env: Record<string, string | undefined>, prefix: 'PUBLIC' | 'PRIVATE'): BlobAuth | null {
-  const token = env[`${prefix}_BLOB_READ_WRITE_TOKEN`];
+  const token = env[`${prefix}_BLOB_READ_WRITE_TOKEN`] ?? env[`${prefix}_READ_WRITE_TOKEN`];
   if (token) return { token };
-  const storeId = env[`${prefix}_BLOB_STORE_ID`];
+  const storeId = env[`${prefix}_BLOB_STORE_ID`] ?? env[`${prefix}_STORE_ID`];
   return storeId ? { storeId } : null;
 }
 

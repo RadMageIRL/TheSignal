@@ -34,7 +34,7 @@ vi.mock('@vercel/blob', () => ({
 }));
 
 const { productionRun } = await import('../../ingest/production.ts');
-const { BlobSiteStore, pruneOpsLogs } = await import('../../ingest/blob.ts');
+const { BlobSiteStore, blobAuth, pruneOpsLogs } = await import('../../ingest/blob.ts');
 const { rollback, summarize } = await import('../../tools/ops.ts');
 const { GET } = await import('../../api/collect.ts');
 
@@ -139,6 +139,16 @@ describe('a production run', () => {
     expect(statuses).toEqual(['publish', 'suspended']);
     expect([ra, rb].find((r) => r.status === 'suspended')!.reasons[0]).toMatch(/another run/);
     expect(Math.min(a.feeds(), b.feeds())).toBe(0);
+  });
+});
+
+describe('Blob store credentials', () => {
+  it('reads a token or a store id under either variable form a prefixed connection creates, and keeps the stores apart', () => {
+    expect(blobAuth({ PUBLIC_BLOB_READ_WRITE_TOKEN: 'a' }, 'PUBLIC')).toEqual({ token: 'a' });
+    expect(blobAuth({ PUBLIC_READ_WRITE_TOKEN: 'b' }, 'PUBLIC')).toEqual({ token: 'b' });
+    expect(blobAuth({ PRIVATE_BLOB_STORE_ID: 'store_1' }, 'PRIVATE')).toEqual({ storeId: 'store_1' });
+    expect(blobAuth({ PRIVATE_STORE_ID: 'store_2' }, 'PRIVATE')).toEqual({ storeId: 'store_2' });
+    expect(blobAuth({ PUBLIC_BLOB_READ_WRITE_TOKEN: 'a', BLOB_READ_WRITE_TOKEN: 'unprefixed' }, 'PRIVATE')).toBe(null);
   });
 });
 

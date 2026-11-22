@@ -50,6 +50,17 @@ describe('request audit', () => {
     expect(rules([...req(1, 'https://a.example/feed.xml', T - 1000), ...clean()])).toContain('robots.txt first');
   });
 
+  it('allows robots.txt to be read again after it was refused, or redirected to a missing file elsewhere', () => {
+    const refused = [...req(1, 'https://slow.example/robots.txt', T, 403), ...req(2, 'https://slow.example/robots.txt', T + 30 * MIN, 200), ...req(2, 'https://slow.example/feed.xml', T + 30 * MIN + 11_500)];
+    expect(rules(refused)).toEqual([]);
+    const elsewhere = [
+      ...req(1, 'https://slow.example/robots.txt', T, 302),
+      ...req(1, 'https://slow.example/robots.txt', T + 400, 404).map((e) => ({ ...e, hop: 1, target: 'https://a.example//robots.txt' })),
+      ...req(2, 'https://slow.example/robots.txt', T + 30 * MIN, 200), ...req(2, 'https://slow.example/feed.xml', T + 30 * MIN + 11_500),
+    ];
+    expect(rules(elsewhere)).toEqual([]);
+  });
+
   it('treats a redirect followed while reading robots.txt as part of reading it', () => {
     const hop = req(1, 'https://a.example/robots.txt', T + 30_000, 404).map((e) => ({ ...e, hop: 1, target: 'https://slow.example/robots-moved.txt' }));
     expect(rules([...clean(), ...hop])).toEqual([]);

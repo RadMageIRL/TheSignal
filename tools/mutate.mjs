@@ -82,7 +82,7 @@ const M = [
   ["collector follows redirects unchecked", "ingest/run.ts", "          return (await robots.check(next.toString(), userAgent)).reason ?? (await robots.pace(next.toString(), userAgent));", "          return null;"],
   ['fetchFeed ignores the redirect permit', 'ingest/fetch.ts', 'if (hop > 0 && validators.permitRedirect) {', 'if (false) {'],
   ['unreachable robots.txt allows all', 'ingest/robots.ts', "  return { kind: 'unreachable', reason: r.error ?? `HTTP ${r.status}` };", "  return { kind: 'none', status: r.status };"],
-  ['rate limit read as no robots.txt', 'ingest/robots.ts', 'const RATE_LIMITED = new Set([419, 429]);', 'const RATE_LIMITED = new Set<number>([]);'],
+  ["rate limit read as no robots.txt", "ingest/robots.ts", "const NOT_FOUND = new Set([404, 410]);", "const NOT_FOUND = new Set([404, 410, 419, 429]);"],
   ['robots.txt cache never expires', 'ingest/robots.ts', 'age < ROBOTS_MAX_AGE_MS', 'age < Infinity'],
   ['robots.txt requested per feed', 'ingest/robots.ts', '    if (known) return known;\n', ''],
   ['unreachable answer kept', 'ingest/robots.ts', "if (found.kind !== 'unreachable') o.cache?.set(", 'if (true) o.cache?.set('],
@@ -172,6 +172,11 @@ const M = [
   ["smoke check passes ineligible feeds", "tools/smoke-prod.ts", "    add('every feed is well-formed RSS 2.0 with only redistributable sources', rss.length === 0,", "    add('every feed is well-formed RSS 2.0 with only redistributable sources', true,"],
   ["interval margin off", "ingest/state.ts", "export const INTERVAL_MARGIN_MS = 1000;", "export const INTERVAL_MARGIN_MS = 0;"],
   ["send time taken before DNS", "ingest/run.ts", "        fr.lastSentAt = Math.max(fr.lastSentAt, sentAt.get(t.url) ?? -Infinity);\n", ""],
+  // Conservative robots.txt reading: only a robots file or a same-host 404/410 is an answer
+  ["robots: refused file read as no file", "ingest/robots.ts", "  if (r.status >= 400 && r.status < 500) return { kind: 'unreachable', reason: `robots.txt access refused", "  if (r.status >= 400 && r.status < 500) return { kind: 'none', status: r.status }; if (false) return { kind: 'unreachable', reason: `robots.txt access refused"],
+  ["robots: HTML page accepted as a robots file", "ingest/robots.ts", "    if (looksLikeHtml(r.body)) return", "    if (false) return"],
+  ["robots: missing file on another host accepted", "ingest/robots.ts", "    if (sameHost) return { kind: 'none', status: r.status };", "    return { kind: 'none', status: r.status };"],
+  ["robots: audit counts a refused file as an answer", "tools/collect-local.ts", "(st >= 400 && st < 500 && !notFound)", "false"],
 ];
 
 const filter = process.argv[2];

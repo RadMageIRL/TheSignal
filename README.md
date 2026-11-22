@@ -47,8 +47,11 @@ The methodology page in the app states the exact grouping, ranking and placement
 - A scheduled collector (`ingest/`) reads each enabled feed with a declared User-Agent
   (`TheSignal/0.1.0 (https://radmagelabs.com/signal/; radmageirl@radmagelabs.com)`) and runs inside hard limits on feeds,
   bytes, time, concurrency and retries. Before it requests anything from a publisher, including each redirect, it reads
-  and evaluates that site's robots.txt (RFC 9309); a feed robots.txt disallows, or whose robots.txt cannot be reached, is
-  never requested. It waits out the site's Crawl-delay between requests, including across runs, and a site that answers
+  and evaluates that site's robots.txt (RFC 9309); a feed robots.txt disallows is never requested. The reading is
+  stricter than the RFC: only a robots file the site serves, or a plain 404 or 410 from the site itself, counts as an
+  answer. A refused file (401, 403 or any other 4xx), a rate limit, a server or network error, a redirect to a missing
+  file on another host, or an HTML page in place of robots.txt means the policy cannot be evaluated, and nothing else is
+  requested from that site. It waits out the site's Crawl-delay between requests, including across runs, and a site that answers
   429 is left alone for a day. Collection is off unless `SIGNAL_INGEST=on`.
 - Each feed is requested at most once per its registry interval, with conditional requests and a backoff after
   failures. The schedule is saved before the first request of every run (marking each feed as contacted at the latest

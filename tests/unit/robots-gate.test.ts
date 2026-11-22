@@ -73,22 +73,24 @@ describe('robots.txt before publisher content (collector)', () => {
     expect(traffic).toEqual({ feedRequests: 1, robotsRequests: 2, robotsRefusals: 1, crawlDelayDeferrals: 0, notDue: 0, notModified: 0, coolDownSkips: 0, bytes: traffic.bytes });
   });
 
-  it('treats an unreachable robots.txt as disallow-all, and a missing one (4xx) as no restrictions', async () => {
+  it('treats an unreachable or refused robots.txt as disallow-all, and a missing one (404) as no restrictions', async () => {
+    const r = (h: string, status: number, error?: string) => fail(`https://${h}/robots.txt`, status, error);
     const answers: Record<string, FetchOutcome | string> = {
-      'down.example': fail('x', 503),
-      'limited.example': fail('x', 429),
-      'hn.example': fail('x', 419),
-      'offline.example': fail('x', 0, 'timeout'),
-      'missing.example': fail('x', 404),
-      'denied.example': fail('x', 403),
+      'down.example': r('down.example', 503),
+      'limited.example': r('limited.example', 429),
+      'hn.example': r('hn.example', 419),
+      'offline.example': r('offline.example', 0, 'timeout'),
+      'missing.example': r('missing.example', 404),
+      'denied.example': r('denied.example', 403),
     };
     const n = net((h) => answers[h]!);
     const srcs = sources(Object.keys(answers));
     const { health } = await collect(srcs, { ...opts, fetcher: n.fetcher });
-    expect(n.feedRequests().map((u) => new URL(u).hostname).sort()).toEqual(['denied.example', 'missing.example']);
+    expect(n.feedRequests().map((u) => new URL(u).hostname)).toEqual(['missing.example']);
     const err = (i: number) => health.find((h) => h.sourceId === `src${i}`)!.error;
     expect(err(0)).toBe('robots.txt unreachable (HTTP 503); treated as disallow-all (RFC 9309 2.3.1.4)');
     expect(err(3)).toBe('robots.txt unreachable (timeout); treated as disallow-all (RFC 9309 2.3.1.4)');
+    expect(err(5)).toBe('robots.txt access refused (HTTP 403); it cannot be evaluated; treated as disallow-all');
   });
 
   it('asks each origin for robots.txt once per run, however many feeds it serves', async () => {
@@ -204,8 +206,22 @@ describe('robots.txt Crawl-delay', () => {
 describe('robots.txt answers (RFC 9309 2.3.1)', () => {
   it('maps each kind of answer to rules, no restrictions or complete disallow', () => {
     expect(robotsPolicyFrom(ok('x', 'User-agent: *\nDisallow: /')).kind).toBe('rules');
-    for (const s of [400, 401, 403, 404, 410]) expect(robotsPolicyFrom(fail('x', s)).kind, String(s)).toBe('none');
-    for (const s of [419, 429, 500, 503, 0]) expect(robotsPolicyFrom(fail('x', s)).kind, String(s)).toBe('unreachable');
+    // Only a plain "not found" from the site itself means there is no robots.txt.
+    for (const s of [404, 410]) expect(robotsPolicyFrom(fail('https://x.example/robots.txt', s)).kind, String(s)).toBe('none');
+    // A file that cannot be read is not permission: refused, rate limited, server and network errors.
+    for (const s of [400, 401, 403, 405, 451, 419, 429, 500, 503, 0]) expect(robotsPolicyFrom(fail('https://x.example/robots.txt', s)).kind, String(s)).toBe('unreachable');
+    expect(robotsPolicyFrom(fail('https://x.example/robots.txt', 403)).kind).toBe('unreachable');
+  });
+
+  it('cannot evaluate a redirect to a missing file on another host, or an HTML page served as robots.txt', () => {
+    const moved = { ...fail('https://x.example/robots.txt', 404), finalUrl: 'https://www.x.example//robots.txt' };
+    expect(robotsPolicyFrom(moved)).toEqual({ kind: 'unreachable', reason: 'robots.txt redirected to a missing file on another host (https://www.x.example//robots.txt); it cannot be evaluated' });
+    const sameHost = { ...fail('https://x.example/robots.txt', 404), finalUrl: 'https://x.example/robots.txt/' };
+    expect(robotsPolicyFrom(sameHost).kind).toBe('none');
+    expect(robotsPolicyFrom(ok('https://x.example/robots.txt', '  <!doctype html><html><body>Sign in</body></html>')).kind).toBe('unreachable');
+    // An empty file, or one with only comments, is a real robots file that restricts nothing.
+    expect(robotsPolicyFrom(ok('https://x.example/robots.txt', ''))).toEqual({ kind: 'rules', status: 200, groups: [] });
+    expect(robotsPolicyFrom(ok('https://x.example/robots.txt', '#'))).toEqual({ kind: 'rules', status: 200, groups: [] });
   });
 
   it('retries a failed robots.txt request only for network and server errors, within the attempts given', async () => {
@@ -318,6 +334,8 @@ describe('no path to publisher content around the gate', () => {
     // The post-deploy checks request only the site under test: one call, behind an origin guard.
     expect(code('tools/smoke-prod.ts').match(/(?<![.\w])fetch\s*\(([^,)]*)/g)).toEqual(['fetch(u']);
     expect(code('tools/smoke-prod.ts')).toMatch(/if \(!allowed\.has\(new URL\(u\)\.origin\)\) throw/);
+    // Every other tool that checks the live site goes through that guarded helper.
+    expect(code('tools/monitor.ts')).toMatch(/siteGet\(base, apiUrl\)/);
   });
 
   it('creates a robots.txt gate in every module that requests feeds', () => {

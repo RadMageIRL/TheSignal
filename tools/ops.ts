@@ -67,7 +67,7 @@ export function summarize(entries: OpsEntry[]) {
   };
 }
 
-async function entriesSince(auth: BlobAuth, sinceMs: number): Promise<OpsEntry[]> {
+export async function entriesSince(auth: BlobAuth, sinceMs: number): Promise<OpsEntry[]> {
   const out: OpsEntry[] = [];
   let cursor: string | undefined;
   do {

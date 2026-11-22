@@ -69,21 +69,44 @@ export function robotsAllows(groups: RobotsGroup[], productToken: string, pathAn
 
 // --- The gate ---------------------------------------------------------------------------
 
-/** What one robots.txt request established for an origin (RFC 9309 section 2.3.1). */
+/**
+ * What one robots.txt request established for an origin. The reading is deliberately more
+ * conservative than RFC 9309 section 2.3.1: only a file the site actually serves, or a plain
+ * "not found" from the site itself, is taken as an answer. Everything else means the policy
+ * cannot be evaluated reliably, and the origin is treated as disallowing everything.
+ */
 export type RobotsPolicy =
-  /** 2xx: the file's rules apply (a file with no matching group restricts nothing). */
+  /** 2xx with a robots file: its rules apply (a file with no matching group restricts nothing). */
   | { kind: 'rules'; status: number; groups: RobotsGroup[] }
-  /** 4xx other than a rate limit: "unavailable", so the site sets no restrictions (2.3.1.3). */
+  /** 404 or 410 from the site's own host: there is no robots.txt, so it sets no restrictions. */
   | { kind: 'none'; status: number }
-  /** Rate limits, 5xx, network errors and policy refusals: "unreachable", so complete disallow (2.3.1.4). */
+  /**
+   * Refused (401, 403 and other 4xx), rate limited (419, 429), server errors, network errors, a
+   * redirect to a missing file on another host, an HTML page instead of a robots file, or a
+   * policy refusal: complete disallow.
+   */
   | { kind: 'unreachable'; reason: string; deferred?: boolean };
 
-/** Rate-limit answers say "not now", not "no robots.txt": 429, and 419 as Hacker News sends it. */
-const RATE_LIMITED = new Set([419, 429]);
+/** Only these answers mean "there is no robots.txt"; any other 4xx means the file is not accessible. */
+const NOT_FOUND = new Set([404, 410]);
+
+/** A web page served at /robots.txt (a soft 404 or a login wall), not a robots file. */
+function looksLikeHtml(body: string): boolean {
+  return /^\s*</.test(body.slice(0, 512));
+}
 
 export function robotsPolicyFrom(r: FetchOutcome): RobotsPolicy {
-  if (r.ok && !r.notModified) return { kind: 'rules', status: r.status, groups: parseRobots(r.body) };
-  if (r.status >= 400 && r.status < 500 && !RATE_LIMITED.has(r.status)) return { kind: 'none', status: r.status };
+  if (r.ok && !r.notModified) {
+    if (looksLikeHtml(r.body)) return { kind: 'unreachable', reason: 'robots.txt answered with an HTML page, not a robots file; it cannot be evaluated' };
+    return { kind: 'rules', status: r.status, groups: parseRobots(r.body) };
+  }
+  if (NOT_FOUND.has(r.status)) {
+    let sameHost = true;
+    try { sameHost = new URL(r.finalUrl).host === new URL(r.url).host; } catch { sameHost = false; }
+    if (sameHost) return { kind: 'none', status: r.status };
+    return { kind: 'unreachable', reason: `robots.txt redirected to a missing file on another host (${r.finalUrl}); it cannot be evaluated` };
+  }
+  if (r.status >= 400 && r.status < 500) return { kind: 'unreachable', reason: `robots.txt access refused (HTTP ${r.status}); it cannot be evaluated` };
   return { kind: 'unreachable', reason: r.error ?? `HTTP ${r.status}` };
 }
 
@@ -219,7 +242,11 @@ export function createRobotsGate(fetcher: Fetcher, policy: FetchPolicy, o: Robot
         return refuse({ allowed: false, basis: 'unreachable', reason: `skipped: robots.txt ${found.reason}; deferred to a later run` });
       }
       if (found.kind === 'unreachable') {
-        return refuse({ allowed: false, basis: 'unreachable', reason: `robots.txt unreachable (${found.reason}); treated as disallow-all (RFC 9309 2.3.1.4)` });
+        // Our own findings (refused, redirected to nothing, an HTML page) already say what happened.
+        const reason = found.reason.startsWith('robots.txt ')
+          ? `${found.reason}; treated as disallow-all`
+          : `robots.txt unreachable (${found.reason}); treated as disallow-all (RFC 9309 2.3.1.4)`;
+        return refuse({ allowed: false, basis: 'unreachable', reason });
       }
       if (found.kind === 'none') return { allowed: true, basis: 'none' };
       const target = u.pathname + u.search;
