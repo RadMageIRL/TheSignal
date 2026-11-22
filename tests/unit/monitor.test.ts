@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BASELINE, evaluate, projectCost } from '../../tools/monitor.ts';
+import { BASELINE, evaluate, projectCost, projectUsage, repeatIsCached } from '../../tools/monitor.ts';
 
 type Summary = Parameters<typeof evaluate>[0];
 const healthy = (over: Partial<Summary> = {}): Summary => ({
@@ -31,6 +31,38 @@ describe('48-hour monitoring checkpoints', () => {
     const a = evaluate(healthy({ longestGapBetweenPublishesMin: 60, runs: 200, failingSources: { 'gov-za': { runs: 150, last: 'timeout' } } }), passing, 24, null);
     expect(a.map((x) => x.level)).toEqual(['watch', 'watch', 'watch']);
     expect(a.map((x) => x.what).join(' ')).toMatch(/gov-za \(timeout\)/);
+  });
+
+  it('count the CDN requests the /signal/ rewrite adds on Labs against its own pre-launch level', () => {
+    const baseline = { at: 'x', days: 7, requestsPerDay: 40000, costPerDayUsd: 0.5 };
+    const labs = (requests: number | null, b: typeof baseline | null = baseline, cached: boolean | null = true) => ({ usage: { cost: 0.6, requests }, baseline: b, cached });
+    expect(evaluate(healthy(), passing, 24, 0.1, BASELINE, labs(40000 + 15000))).toEqual([]);
+    const over = evaluate(healthy(), passing, 24, 0.1, BASELINE, labs(40000 + 2 * BASELINE.labsRewriteRequestsPerDay + 1000));
+    expect(over.map((a) => a.level)).toEqual(['stop']);
+    expect(over[0]!.what).toMatch(/Labs CDN requests/);
+    // Billed by the day: a 6-hour window is reported, never compared.
+    expect(evaluate(healthy({ runs: 24, published: 24, requests: { feed: 800, robots: 20, notModified: 0, perHost: {} }, bytesRead: 100e6 }), passing, 6, 0.03, BASELINE, labs(90000))).toEqual([]);
+    expect(evaluate(healthy(), passing, 24, 0.1, BASELINE, labs(50000, null))[0]!.what).toMatch(/no Labs baseline/);
+    expect(evaluate(healthy(), passing, 24, 0.1, BASELINE, labs(null))[0]!.what).toMatch(/Usage page/);
+    expect(evaluate(healthy(), passing, 24, 0.1, BASELINE, { usage: null, baseline: null, cached: false })[0]!.what).toMatch(/did not cache/);
+  });
+
+  it('reads edge requests per project from the usage output', () => {
+    const rows = [
+      { project: 'radmagelabs-com', service: 'Edge Requests', quantity: 52000, cost: 0 },
+      { project: 'radmagelabs-com', service: 'Fast Data Transfer', quantity: 3.2, cost: 0.1 },
+      { project: 'the-signal', service: 'Edge Requests', quantity: 9000, cost: 0.01 },
+    ];
+    expect(projectUsage(rows, 'radmagelabs-com')).toEqual({ cost: 0.1, requests: 52000 });
+    expect(projectUsage(rows, 'the-signal')).toEqual({ cost: 0.01, requests: 9000 });
+    expect(projectUsage([{ project: 'the-signal', cost: 0.07 }], 'the-signal')).toEqual({ cost: 0.07, requests: null });
+  });
+
+  it('tells a cached repeat request from one that reached the origin again', async () => {
+    const answer = (states: string[]) => { let i = 0; return async () => new Response('{}', { headers: states[i] ? { 'x-vercel-cache': states[i++]! } : {} }); };
+    expect(await repeatIsCached(answer(['MISS', 'HIT']), 'https://radmagelabs.com/signal/')).toBe(true);
+    expect(await repeatIsCached(answer(['MISS', 'MISS']), 'https://radmagelabs.com/signal/')).toBe(false);
+    expect(await repeatIsCached(answer([]), 'https://radmagelabs.com/signal/')).toBe(null);
   });
 
   it('reads the project line from the CLI usage output, or says it cannot', () => {

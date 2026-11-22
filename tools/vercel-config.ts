@@ -17,11 +17,17 @@ export function vercelConfig(blobBase: string, indexHtml: string) {
     framework: 'vite',
     buildCommand: 'npm run build',
     outputDirectory: 'dist',
-    redirects: [{ source: '/', destination: '/signal/', permanent: false }],
+    redirects: [
+      { source: '/', destination: '/signal/', permanent: false },
+      { source: '/signal', destination: '/signal/', permanent: false },
+    ],
+    // The bare /signal/ gets its own rule: on Vercel a :path* source does not match the bare path
+    // (seen on the Labs project), and radmagelabs.com/signal/ rewrites to exactly that path here.
     rewrites: [
       { source: '/signal/data/snapshot.json', destination: `${blobBase}/current/snapshot.json` },
       { source: '/signal/rss.xml', destination: `${blobBase}/current/rss.xml` },
       { source: '/signal/rss/:feed([a-z]+).xml', destination: `${blobBase}/current/rss/:feed.xml` },
+      { source: '/signal/', destination: '/index.html' },
       { source: '/signal/:path*', destination: '/:path*' },
     ],
     headers: [

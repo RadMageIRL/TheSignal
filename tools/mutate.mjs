@@ -177,6 +177,11 @@ const M = [
   ["robots: HTML page accepted as a robots file", "ingest/robots.ts", "    if (looksLikeHtml(r.body)) return", "    if (false) return"],
   ["robots: missing file on another host accepted", "ingest/robots.ts", "    if (sameHost) return { kind: 'none', status: r.status };", "    return { kind: 'none', status: r.status };"],
   ["robots: audit counts a refused file as an answer", "tools/collect-local.ts", "(st >= 400 && st < 500 && !notFound)", "false"],
+  // Path-based launch: radmagelabs.com/signal/ rewrites to the project; Labs requests are monitored
+  ["bare /signal/ not served by the project", "tools/vercel-config.ts", "      { source: '/signal/', destination: '/index.html' },\n", ""],
+  ["Labs rewrite load never compared", "tools/monitor.ts", "      if (extra > 2 * baseline.labsRewriteRequestsPerDay) {", "      if (false) {"],
+  ["Labs daily usage compared on a short window", "tools/monitor.ts", "    if (hours < 24) { /* reported, not compared */ }", "    if (false) { /* reported, not compared */ }"],
+  ["Labs cache miss not flagged", "tools/monitor.ts", "  if (labs.cached === false) {", "  if (false) {"],
 ];
 
 const filter = process.argv[2];

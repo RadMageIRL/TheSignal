@@ -42,6 +42,8 @@ All notable changes to The Signal are recorded here. Nothing has been released y
   Crawl-delay, intervals, cool-downs and the declared identity, and stops at the first violation.
 - Production collection on Vercel Cron with Vercel Blob storage: a kill switch that needs no redeploy, a store identity
   check, a recovery drill, private history for rollback, operations logs kept 14 days, and post-deploy checks.
+- Launch monitoring (`tools/monitor.ts`) that also counts the RadMage Labs side of the radmagelabs.com/signal/
+  rewrite: Labs CDN requests against their pre-launch level, and whether Labs caches the rewritten files.
 - Security headers, including a Content-Security-Policy with no inline exceptions beyond the hashed theme script; the
   browser tests run under it.
 - A privacy section on the methodology page.

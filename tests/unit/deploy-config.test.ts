@@ -34,8 +34,19 @@ describe('the generated vercel.json', () => {
       { source: '/signal/data/snapshot.json', destination: `${BASE}/current/snapshot.json` },
       { source: '/signal/rss.xml', destination: `${BASE}/current/rss.xml` },
       { source: '/signal/rss/:feed([a-z]+).xml', destination: `${BASE}/current/rss/:feed.xml` },
+      { source: '/signal/', destination: '/index.html' },
       { source: '/signal/:path*', destination: '/:path*' },
     ]);
+  });
+
+  it('answers the bare paths with the page, as the Labs rewrite of radmagelabs.com/signal/ requests it', () => {
+    expect(cfg.redirects).toEqual([
+      { source: '/', destination: '/signal/', permanent: false },
+      { source: '/signal', destination: '/signal/', permanent: false },
+    ]);
+    const bare = cfg.rewrites.findIndex((r) => r.source === '/signal/');
+    expect(bare).toBeGreaterThan(-1);
+    expect(bare).toBeLessThan(cfg.rewrites.findIndex((r) => r.source === '/signal/:path*'));
   });
 
   it('runs the collector every 15 minutes with a bounded duration', () => {
