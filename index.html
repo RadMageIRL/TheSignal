@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-density="compact">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Signal | Global headlines, many perspectives</title>
+    <meta name="description" content="Headlines from newsrooms around the world, grouped by story so you can compare how each one covers it. Every headline links to its publisher." />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <link rel="alternate" type="application/rss+xml" title="The Signal: All headlines" href="/signal/rss.xml" />
+    <link rel="alternate" type="application/rss+xml" title="The Signal: U.S. &amp; Politics" href="/signal/rss/us.xml" />
+    <link rel="alternate" type="application/rss+xml" title="The Signal: World News" href="/signal/rss/world.xml" />
+    <link rel="alternate" type="application/rss+xml" title="The Signal: Markets &amp; Technology" href="/signal/rss/markets.xml" />
+    <link rel="alternate" type="application/rss+xml" title="The Signal: Outside the Mainstream" href="/signal/rss/alternative.xml" />
+    <link rel="alternate" type="application/rss+xml" title="The Signal: The Airwaves" href="/signal/rss/airwaves.xml" />
+    <link rel="alternate" type="application/rss+xml" title="The Signal: The People's Pulse" href="/signal/rss/pulse.xml" />
+    <link rel="alternate" type="application/rss+xml" title="The Signal: Most covered" href="/signal/rss/trending.xml" />
+    <link rel="alternate" type="application/rss+xml" title="The Signal: Global Perspectives" href="/signal/rss/perspectives.xml" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23101215'/%3E%3Cpath d='M6 22c3-8 5-12 7-12s3 9 6 9 3-6 7-6' stroke='%23e2493a' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <script>
+      try {
+        var p = JSON.parse(localStorage.getItem('the-signal:prefs:v1') || '{}');
+        var t = p.theme === 'light' || p.theme === 'system' ? p.theme : 'dark';
+        if (t === 'system') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = t;
+        if (p.density === 'comfortable') document.documentElement.dataset.density = 'comfortable';
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript><p style="padding:2rem;font-family:Georgia,serif">The Signal needs JavaScript to show headlines.</p></noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

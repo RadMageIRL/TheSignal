@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<title>The Signal: Most covered</title>
+<link>https://radmagelabs.com/signal/#trending</link>
+<description>The stories carried by the most outlets in the last six hours. Headlines link to their publishers; The Signal hosts no articles. Prototype capture for review; not a live feed.</description>
+<language>en</language>
+<copyright>Headlines, names and linked content belong to their publishers. Feed structure by The Signal.</copyright>
+<lastBuildDate>Sun, 22 Nov 2026 12:00:00 GMT</lastBuildDate>
+<docs>https://www.rssboard.org/rss-specification</docs>
+<generator>The Signal 0.1.0</generator>
+<ttl>30</ttl>
+<atom:link href="https://radmagelabs.com/signal/rss/trending.xml" rel="self" type="application/rss+xml"/>
+<item><title>Ocean treaty agreed at Orbis summit after all-night talks</title><link>https://rio-gazette.example/news/fx0009</link><guid isPermaLink="false">tag:radmagelabs.com,2026:signal:article:fx0009</guid><pubDate>Sun, 22 Nov 2026 06:24:00 GMT</pubDate><description>Rio Gazette, Brazil. One of 5 outlets in 5 countries covering this story: Brazil, Germany, India, Nigeria, United Kingdom.</description><category>World News</category><category>Africa &amp; the Americas</category><category>Brazil</category><source url="https://rio-gazette.example/feed.xml">Rio Gazette</source></item>
+<item><title>Calder Bay port strike halts shipping</title><link>https://kiwi-dispatch.example/news/fx0013</link><guid isPermaLink="false">tag:radmagelabs.com,2026:signal:article:fx0013</guid><pubDate>Sun, 22 Nov 2026 08:00:00 GMT</pubDate><description>Kiwi Dispatch, New Zealand. One of 3 outlets in 3 countries covering this story: Japan, New Zealand, Qatar.</description><category>World News</category><category>Asia &amp; Pacific</category><category>New Zealand</category><source url="https://kiwi-dispatch.example/feed.xml">Kiwi Dispatch</source></item>
+<item><title>Senate passes Harlow infrastructure bill after late vote</title><link>https://capitol-ledger.example/news/fx0016</link><guid isPermaLink="false">tag:radmagelabs.com,2026:signal:article:fx0016</guid><pubDate>Sun, 22 Nov 2026 10:30:00 GMT</pubDate><description>The Capitol Ledger, United States. One of 2 outlets in 1 country covering this story: United States.</description><category>U.S. &amp; Politics</category><category>Washington</category><category>United States</category><source url="https://capitol-ledger.example/feed.xml">The Capitol Ledger</source></item>
+</channel>
+</rss>

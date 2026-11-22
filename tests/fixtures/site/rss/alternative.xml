@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<title>The Signal: Outside the Mainstream</title>
+<link>https://radmagelabs.com/signal/#outside</link>
+<description>Independent and alternative outlets from across the spectrum. Inclusion is not endorsement. Headlines link to their publishers; The Signal hosts no articles. Prototype capture for review; not a live feed.</description>
+<language>en</language>
+<copyright>Headlines, names and linked content belong to their publishers. Feed structure by The Signal.</copyright>
+<lastBuildDate>Sun, 22 Nov 2026 12:00:00 GMT</lastBuildDate>
+<docs>https://www.rssboard.org/rss-specification</docs>
+<generator>The Signal 0.1.0</generator>
+<ttl>30</ttl>
+<atom:link href="https://radmagelabs.com/signal/rss/alternative.xml" rel="self" type="application/rss+xml"/>
+<item><title>Records show county paid twice for unused software</title><link>https://open-record.example/news/fx0026</link><guid isPermaLink="false">tag:radmagelabs.com,2026:signal:article:fx0026</guid><pubDate>Sat, 21 Nov 2026 16:00:00 GMT</pubDate><description>The Open Record, United States. Investigation.</description><category>Outside the Mainstream</category><category>Investigations</category><category>United States</category><category>Investigation</category><source url="https://open-record.example/feed.xml">The Open Record</source></item>
+<item><title>The case against another round of stimulus</title><link>https://dissent-quarterly.example/news/fx0027</link><guid isPermaLink="false">tag:radmagelabs.com,2026:signal:article:fx0027</guid><pubDate>Sat, 21 Nov 2026 06:00:00 GMT</pubDate><description>Dissent Quarterly, United Kingdom. Commentary.</description><category>Outside the Mainstream</category><category>Commentary</category><category>United Kingdom</category><source url="https://dissent-quarterly.example/feed.xml">Dissent Quarterly</source></item>
+</channel>
+</rss>

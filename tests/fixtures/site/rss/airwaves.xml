@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<title>The Signal: The Airwaves</title>
+<link>https://radmagelabs.com/signal/#airwaves</link>
+<description>Latest podcast episodes, linked to each show. Headlines link to their publishers; The Signal hosts no articles. Prototype capture for review; not a live feed.</description>
+<language>en</language>
+<copyright>Headlines, names and linked content belong to their publishers. Feed structure by The Signal.</copyright>
+<lastBuildDate>Sun, 22 Nov 2026 12:00:00 GMT</lastBuildDate>
+<docs>https://www.rssboard.org/rss-specification</docs>
+<generator>The Signal 0.1.0</generator>
+<ttl>30</ttl>
+<atom:link href="https://radmagelabs.com/signal/rss/airwaves.xml" rel="self" type="application/rss+xml"/>
+<item><title>Episode 212: A historian on the age of empires</title><link>https://long-table.example/news/fx0028</link><guid isPermaLink="false">tag:radmagelabs.com,2026:signal:article:fx0028</guid><pubDate>Sat, 21 Nov 2026 10:00:00 GMT</pubDate><description>The Long Table, United States. Podcast.</description><category>The Airwaves</category><category>Latest Episodes</category><category>United States</category><category>Podcast</category><source url="https://long-table.example/feed.xml">The Long Table</source></item>
+</channel>
+</rss>

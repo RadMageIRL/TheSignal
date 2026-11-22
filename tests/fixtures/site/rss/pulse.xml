@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<title>The Signal: The People&apos;s Pulse</title>
+<link>https://radmagelabs.com/signal/#pulse</link>
+<description>What public communities are sharing and reading. Activity is not verification. Headlines link to their publishers; The Signal hosts no articles. Prototype capture for review; not a live feed.</description>
+<language>en</language>
+<copyright>Headlines, names and linked content belong to their publishers. Feed structure by The Signal.</copyright>
+<lastBuildDate>Sun, 22 Nov 2026 12:00:00 GMT</lastBuildDate>
+<docs>https://www.rssboard.org/rss-specification</docs>
+<generator>The Signal 0.1.0</generator>
+<ttl>30</ttl>
+<atom:link href="https://radmagelabs.com/signal/rss/pulse.xml" rel="self" type="application/rss+xml"/>
+<item><title>Ask the forum: how do you back up family photos?</title><link>https://town-square.example/news/fx0030</link><guid isPermaLink="false">tag:radmagelabs.com,2026:signal:article:fx0030</guid><pubDate>Sun, 22 Nov 2026 09:30:00 GMT</pubDate><description>Town Square Forum, International.</description><category>The People&apos;s Pulse</category><category>Discussions</category><category>International</category><source url="https://town-square.example/feed.xml">Town Square Forum</source></item>
+<item><title>Lake Varnu</title><link>https://most-read.example/news/fx0031</link><guid isPermaLink="false">tag:radmagelabs.com,2026:signal:article:fx0031</guid><pubDate>Sun, 22 Nov 2026 00:00:00 GMT</pubDate><description>Encyclopedia Most Read, International.</description><category>The People&apos;s Pulse</category><category>What People Are Reading</category><category>International</category><source url="https://most-read.example/feed.xml">Encyclopedia Most Read</source></item>
+</channel>
+</rss>
