@@ -2,6 +2,7 @@
 import type { Article, SectionId } from '../../shared/types.ts';
 import { normalizeTitle } from '../../shared/cluster.ts';
 import { countryName } from '../../shared/countries.ts';
+import { languageName, primaryLanguage } from '../../shared/languages.ts';
 import type { SourceMeta, View } from './data.ts';
 
 export type Within = 'any' | '6h' | '24h' | '48h';
@@ -11,11 +12,12 @@ export interface SearchFilters {
   section: SectionId | 'all';
   source: string; // source id or 'all'
   country: string; // ISO code or 'all'
+  language: string; // primary language subtag ('en', 'es', ...) or 'all'
   within: Within;
   sort: SortOrder;
 }
 
-export const DEFAULT_FILTERS: SearchFilters = { section: 'all', source: 'all', country: 'all', within: 'any', sort: 'newest' };
+export const DEFAULT_FILTERS: SearchFilters = { section: 'all', source: 'all', country: 'all', language: 'all', within: 'any', sort: 'newest' };
 
 const WITHIN_MS: Record<Within, number> = { any: Infinity, '6h': 6 * 3600_000, '24h': 24 * 3600_000, '48h': 48 * 3600_000 };
 
@@ -27,7 +29,7 @@ export interface SearchResult {
   matched: number;
   /** Matches after filters, before the display limit. */
   total: number;
-  facets: { sections: Facet[]; sources: Facet[]; countries: Facet[] };
+  facets: { sections: Facet[]; sources: Facet[]; countries: Facet[]; languages: Facet[] };
 }
 
 export const RESULT_LIMIT = 100;
@@ -46,7 +48,7 @@ function facet(items: Article[], key: (a: Article) => string, label: (v: string)
 export function searchArticles(view: View, sources: Map<string, SourceMeta>, query: string, f: SearchFilters, nowMs: number,
   sectionLabel: (s: SectionId) => string = (s) => s): SearchResult {
   const terms = queryTerms(query);
-  const empty = { results: [], matched: 0, total: 0, facets: { sections: [], sources: [], countries: [] } };
+  const empty = { results: [], matched: 0, total: 0, facets: { sections: [], sources: [], countries: [], languages: [] } };
   if (terms.length === 0) return empty;
   const matched: Article[] = [];
   for (const a of view.articles.values()) {
@@ -54,12 +56,13 @@ export function searchArticles(view: View, sources: Map<string, SourceMeta>, que
     const hay = ' ' + normalizeTitle(`${a.title} ${s?.name ?? ''} ${countryName(a.country)}`) + ' ';
     if (terms.every((t) => hay.includes(t))) matched.push(a);
   }
-  const time = (a: Article) => Date.parse(a.publishedAt ?? a.fetchedAt);
+  const time = (a: Article) => Date.parse(a.publishedAt ?? a.firstSeenAt);
   const within = WITHIN_MS[f.within];
   const filtered = matched.filter((a) =>
     (f.section === 'all' || a.section === f.section)
     && (f.source === 'all' || a.sourceId === f.source)
     && (f.country === 'all' || a.country === f.country)
+    && (f.language === 'all' || primaryLanguage(a.language) === f.language)
     && (within === Infinity || nowMs - time(a) <= within));
   const outlets = (a: Article) => {
     const cid = view.clusterOf.get(a.id);
@@ -74,6 +77,7 @@ export function searchArticles(view: View, sources: Map<string, SourceMeta>, que
       sections: facet(matched, (a) => a.section, (v) => sectionLabel(v as SectionId)),
       sources: facet(matched, (a) => a.sourceId, (v) => sources.get(v)?.name ?? v),
       countries: facet(matched, (a) => a.country, countryName),
+      languages: facet(matched, (a) => primaryLanguage(a.language), languageName),
     },
   };
 }

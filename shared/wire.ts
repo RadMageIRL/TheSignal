@@ -6,6 +6,8 @@ import { SECTION_OF_SUB, summarizeCluster } from './layout.ts';
 
 export interface WireArticle {
   i: string; s: string; t: string; u: string; p: string | null; b: Subsection;
+  /** First seen by The Signal; sent only for items without a publication time. */
+  f?: string;
   w?: string; d?: number; g?: string; n?: number; c?: number; x?: string; o?: string;
 }
 export interface WireCluster { i: string; a: string[]; f: string; l: string }
@@ -30,6 +32,7 @@ export function encodeSnapshot(s: Snapshot): WireSnapshot {
     v: 1, mode: s.mode, generatedAt: s.generatedAt, nextUpdateAt: s.nextUpdateAt, sources: s.sources,
     articles: s.articles.map((a) => {
       const w: WireArticle = { i: a.id, s: a.sourceId, t: a.title, u: a.url, p: a.publishedAt, b: a.subsection };
+      if (a.publishedAt === null) w.f = a.firstSeenAt;
       if (a.wire) w.w = a.wire;
       if (a.podcast?.durationSec) w.d = a.podcast.durationSec;
       if (a.podcast?.guest) w.g = a.podcast.guest;
@@ -54,7 +57,7 @@ export function decodeArticles(w: WireSnapshot): Map<string, Article> {
     const s = src.get(a.s);
     if (!s) continue;
     const art: Article = {
-      id: a.i, sourceId: a.s, title: a.t, url: a.u, publishedAt: a.p, fetchedAt: w.generatedAt,
+      id: a.i, sourceId: a.s, title: a.t, url: a.u, publishedAt: a.p, firstSeenAt: a.f ?? a.p ?? w.generatedAt,
       section: SECTION_OF_SUB[a.b] ?? s.section, subsection: a.b, contentType: s.contentType, country: s.country, language: s.language,
     };
     if (a.w) art.wire = a.w;

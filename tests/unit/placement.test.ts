@@ -11,7 +11,7 @@ function art(sourceId: string, sub: Subsection, title: string, extra: Partial<Ar
   n++;
   return {
     id: `p${n}`, sourceId, title, url: `https://${sourceId}.example/${n}`, publishedAt: '2026-11-22T10:00:00Z',
-    fetchedAt: '2026-11-22T12:00:00Z', section: SECTION_OF_SUB[sub] as SectionId, subsection: sub, contentType: 'reporting',
+    firstSeenAt: '2026-11-22T12:00:00Z', section: SECTION_OF_SUB[sub] as SectionId, subsection: sub, contentType: 'reporting',
     country: 'GB', language: 'en', ...extra,
   };
 }

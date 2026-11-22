@@ -1121,9 +1121,21 @@
    "excerpt": "yes",
    "images": "unknown"
   },
-  "restrictions": "Reproducing documents that bear their authors' names (speeches, working papers) in whole or in part needs ECB permission; whether a title counts is unclear, so ECB items stay out of RSS feeds.",
+  "restrictions": "Documents that bear their authors' names (speeches, interviews, blog posts, press conference transcripts, Working and Occasional Papers) need the ECB's or the authors' prior written authorisation, so those paths are left out. ECB items stay out of RSS feeds until that use is ruled on.",
   "enabled": true,
-  "reviewed": "2026-11-22"
+  "reviewed": "2026-11-22",
+  "filters": {
+   "excludePaths": [
+    "/press/key/",
+    "/press/inter/",
+    "/press/blog/",
+    "/press/press_conference/",
+    "//press/key/",
+    "//press/inter/",
+    "//press/blog/",
+    "//press/press_conference/"
+   ]
+  }
  },
  {
   "id": "dw",
@@ -4881,7 +4893,10 @@
    {
     "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia.org/all-access/{Y}/{M}/{D}",
     "kind": "wikipedia-top",
-    "subsection": "reading"
+    "subsection": "reading",
+    "redirectHosts": [
+     "www.wikimedia.org"
+    ]
    }
   ],
   "status": "READY",
@@ -6529,14 +6544,14 @@
    "the CDC no-endorsement disclaimer must be shown prominently wherever CDC items appear"
   ],
   "termsUrl": "https://www.cdc.gov/other/agencymaterials.html",
-  "attribution": "mandatory:",
+  "attribution": "Source: CDC (credit CDC as the developer); state that the material is available free on the CDC website",
   "rights": {
    "display": "yes",
-   "syndication": "yes",
+   "syndication": "unknown",
    "excerpt": "yes",
    "images": "no"
   },
-  "restrictions": "A prominent disclaimer that the use \"does not imply endorsement by CDC, ATSDR, HHS or the United States Government\".",
+  "restrictions": "Headlines unchanged and linked as CDC supplies them; a prominent no-endorsement disclaimer; no CDC logos; no fee. CDC's syndication Usage Guidelines say \"Redistribution of CDC syndicated content is not allowed.\", so CDC items stay out of RSS feeds until that is ruled on.",
   "enabled": false,
   "reviewed": "2026-11-22",
   "notice": "Source: Centers for Disease Control and Prevention (CDC). Use of this material does not imply endorsement by CDC, ATSDR, HHS or the United States Government. The material is available on the CDC website at no charge."
@@ -7757,7 +7772,10 @@
    {
     "url": "https://pm.gc.ca/en/news.rss",
     "kind": "rss",
-    "subsection": "africa-americas"
+    "subsection": "africa-americas",
+    "redirectHosts": [
+     "www.pm.gc.ca"
+    ]
    }
   ],
   "status": "READY",
@@ -10050,9 +10068,14 @@
    "excerpt": "yes",
    "images": "unknown"
   },
-  "restrictions": "\"We reserve the right to terminate any use of feeds on this or any other grounds that we deem appropriate.\" \"Wholesale copying of multiple blog entries, articles, editorials, reports or other similar text is not permitted.\" There is a separate scraper ban; the RSS use is expressly invited. The grant says \"on your website\", so it is silent on our outgoing RSS.",
+  "restrictions": "\"We reserve the right to terminate any use of feeds on this or any other grounds that we deem appropriate.\" \"Wholesale copying of multiple blog entries, articles, editorials, reports or other similar text is not permitted.\" There is a separate scraper ban; the RSS use is expressly invited. The grant says \"on your website\", so it is silent on our outgoing RSS. The feed also carries Associated Press stories (4 of 10 on 2026-11-22), which this invitation may not cover; items credited to AP are left out.",
   "enabled": true,
-  "reviewed": "2026-11-22"
+  "reviewed": "2026-11-22",
+  "filters": {
+   "dropWires": [
+    "AP"
+   ]
+  }
  },
  {
   "id": "eff",
@@ -10583,7 +10606,7 @@
    }
   ],
   "status": "READY",
-  "statusNote": "Affirmative CC license and extracts rule. Not collected by default: story grouping reads English headlines only, so non-English sources wait for multilingual grouping.",
+  "statusNote": "Affirmative CC license and extracts rule. Enabled 2026-11-22: shown as published with a language label and not grouped, because story grouping reads English headlines only.",
   "gates": [],
   "termsUrl": "https://theconversation.com/fr/republishing-guidelines",
   "attribution": "credit The Conversation France and link to the article.",
@@ -10594,7 +10617,7 @@
    "images": "no"
   },
   "restrictions": "CC BY-ND. Titles are French, so they will not group with English headlines.",
-  "enabled": false,
+  "enabled": true,
   "reviewed": "2026-11-22",
   "network": "the-conversation"
  },
@@ -10618,7 +10641,7 @@
    }
   ],
   "status": "READY",
-  "statusNote": "Affirmative CC license. Not collected by default: story grouping reads English headlines only, so non-English sources wait for multilingual grouping.",
+  "statusNote": "Affirmative CC license. Enabled 2026-11-22: shown as published with a language label and not grouped, because story grouping reads English headlines only.",
   "gates": [],
   "termsUrl": "https://theconversation.com/id/republishing-guidelines",
   "attribution": "credit The Conversation and link to the article.",
@@ -10629,7 +10652,7 @@
    "images": "no"
   },
   "restrictions": "CC BY-ND. The Indonesian page has no extracts clause that I found. Titles are Indonesian.",
-  "enabled": false,
+  "enabled": true,
   "reviewed": "2026-11-22",
   "network": "the-conversation"
  },
@@ -10653,7 +10676,7 @@
    }
   ],
   "status": "READY",
-  "statusNote": "Affirmative CC license and extracts rule. Not collected by default: story grouping reads English headlines only, so non-English sources wait for multilingual grouping.",
+  "statusNote": "Affirmative CC license and extracts rule. Enabled 2026-11-22: shown as published with a language label and not grouped, because story grouping reads English headlines only.",
   "gates": [],
   "termsUrl": "https://theconversation.com/es/republishing-guidelines",
   "attribution": "credit The Conversation and link to the article.",
@@ -10664,7 +10687,7 @@
    "images": "no"
   },
   "restrictions": "CC BY-ND; no systematic republishing and no framing. Titles are Spanish.",
-  "enabled": false,
+  "enabled": true,
   "reviewed": "2026-11-22",
   "network": "the-conversation"
  },
@@ -10688,7 +10711,7 @@
    }
   ],
   "status": "READY",
-  "statusNote": "Affirmative CC license. Not collected by default: story grouping reads English headlines only, so non-English sources wait for multilingual grouping.",
+  "statusNote": "Affirmative CC license. Enabled 2026-11-22: shown as published with a language label and not grouped, because story grouping reads English headlines only.",
   "gates": [],
   "termsUrl": "https://theconversation.com/br/republishing-guidelines",
   "attribution": "credit The Conversation and link to the article.",
@@ -10699,7 +10722,7 @@
    "images": "no"
   },
   "restrictions": "CC BY-ND; no systematic republishing and no framing. Titles are Portuguese.",
-  "enabled": false,
+  "enabled": true,
   "reviewed": "2026-11-22",
   "network": "the-conversation"
  },
@@ -11041,7 +11064,7 @@
    }
   ],
   "status": "READY",
-  "statusNote": "The same CC BY-NC-ND policy. Not collected by default: story grouping reads English headlines only, so non-English sources wait for multilingual grouping.",
+  "statusNote": "The same CC BY-NC-ND policy. Enabled 2026-11-22: shown as published with a language label and not grouped, because story grouping reads English headlines only.",
   "gates": [],
   "termsUrl": "https://dialogue.earth/en/republishing/",
   "attribution": "as dialogue-earth.",
@@ -11052,7 +11075,7 @@
    "images": "no"
   },
   "restrictions": "as dialogue-earth. Mostly translations of the English edition, so deduplicate.",
-  "enabled": false,
+  "enabled": true,
   "reviewed": "2026-11-22",
   "network": "dialogue-earth"
  },
@@ -12346,7 +12369,7 @@
    }
   ],
   "status": "READY",
-  "statusNote": "A site-wide CC license, also declared in the feed. Not collected by default: story grouping reads English headlines only, so non-English sources wait for multilingual grouping.",
+  "statusNote": "A site-wide CC license, also declared in the feed. Enabled 2026-11-22: shown as published with a language label and not grouped, because story grouping reads English headlines only.",
   "gates": [],
   "termsUrl": "https://www.twreporter.org/a/license-footer",
   "attribution": "name attribution under CC BY.",
@@ -12357,7 +12380,7 @@
    "images": "unknown"
   },
   "restrictions": "non-commercial; no derivatives; items marked \"© ... All rights reserved\" are excluded; \"本服務不授權政黨或政治人物使用\" (the license is not granted to political parties or politicians). Titles are Chinese.",
-  "enabled": false,
+  "enabled": true,
   "reviewed": "2026-11-22"
  },
  {
@@ -14139,7 +14162,7 @@
    }
   ],
   "status": "READY",
-  "statusNote": "An affirmative CC republication grant. Not collected by default: story grouping reads English headlines only, so non-English sources wait for multilingual grouping.",
+  "statusNote": "An affirmative CC republication grant. Enabled 2026-11-22: shown as published with a language label and not grouped, because story grouping reads English headlines only.",
   "gates": [],
   "termsUrl": "",
   "attribution": "source cited by hyperlink.",
@@ -14150,7 +14173,7 @@
    "images": "unknown"
   },
   "restrictions": "no text changes; non-commercial; the license version is not named. Titles are Arabic.",
-  "enabled": false,
+  "enabled": true,
   "reviewed": "2026-11-22"
  },
  {
@@ -14229,7 +14252,7 @@
    }
   ],
   "status": "READY",
-  "statusNote": "Affirmative CC BY-ND for all content. Not collected by default: story grouping reads English headlines only, so non-English sources wait for multilingual grouping.",
+  "statusNote": "Affirmative CC BY-ND for all content. Enabled 2026-11-22: shown as published with a language label and not grouped, because story grouping reads English headlines only.",
   "gates": [],
   "termsUrl": "https://apublica.org/republish-our-stories/",
   "attribution": "the author and Agência Pública in the byline, plus a link to the original story.",
@@ -14240,7 +14263,7 @@
    "images": "no"
   },
   "restrictions": "photos only alongside their articles; the page also invites sign-up for republishing. Titles are Portuguese. Title-only use under BY-ND is uncertain.",
-  "enabled": false,
+  "enabled": true,
   "reviewed": "2026-11-22"
  },
  {

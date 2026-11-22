@@ -35,7 +35,7 @@ export function articleId(canonical: string): string {
   return createHash('sha1').update(canonical).digest('hex').slice(0, 14);
 }
 
-export function toArticle(item: RawItem, source: SourceEntry, feed: FeedEndpoint, fetchedAt: string): Article {
+export function toArticle(item: RawItem, source: SourceEntry, feed: FeedEndpoint, firstSeenAt: string): Article {
   const canonical = canonicalUrl(item.link);
   const a: Article = {
     id: articleId(canonical),
@@ -43,7 +43,7 @@ export function toArticle(item: RawItem, source: SourceEntry, feed: FeedEndpoint
     title: item.title,
     url: item.link,
     publishedAt: item.publishedAt,
-    fetchedAt,
+    firstSeenAt,
     section: feed.section ?? source.section,
     subsection: feed.subsection,
     contentType: source.contentType,

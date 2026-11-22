@@ -71,6 +71,9 @@ export function FeedsPage({ data, focus }: { data: SiteData; focus?: string }) {
                 </span>
               </div>
               <p className="feed-desc">{spec.description}</p>
+              {spec.scope === 'perspectives' && n.total === 0 && (
+                <p className="feed-desc">Empty for now: no current story has headlines from three or more countries that The Signal may show.</p>
+              )}
               <div className="feed-url">
                 <code>{url}</code>
                 <CopyButton text={url} label={`the ${spec.title} feed`} />

@@ -119,8 +119,16 @@ export interface Article {
   sourceId: string;
   title: string;
   url: string;
+  /**
+   * Publication time as the feed gave it, kept only when it is believable: not in the future and
+   * not later than the moment The Signal first saw the item. Otherwise null.
+   */
   publishedAt: string | null;
-  fetchedAt: string;
+  /**
+   * When The Signal first saw the item in any feed, kept across runs. Undated items are aged by
+   * this, so an unchanged undated item does not look new on every run.
+   */
+  firstSeenAt: string;
   section: SectionId;
   subsection: Subsection;
   contentType: ContentType;
@@ -154,7 +162,8 @@ export interface Cluster {
 export interface SourceHealth {
   sourceId: string;
   ok: boolean;
-  status: 'fresh' | 'stale' | 'failed' | 'not-modified' | 'skipped';
+  /** not-due: not requested this run because its polling interval has not passed. */
+  status: 'fresh' | 'stale' | 'failed' | 'not-modified' | 'skipped' | 'not-due';
   items: number;
   lastAttempt: string;
   lastSuccess?: string;

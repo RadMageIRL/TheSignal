@@ -33,7 +33,14 @@ const SOURCES: Src[] = [
   ['morning-brief', 'Morning Brief', 'GB', 'airwaves', 'podcast', 'private', 'unknown'],
   ['town-square', 'Town Square Forum', 'INT', 'pulse', 'community', 'community', 'yes'],
   ['most-read', 'Encyclopedia Most Read', 'INT', 'pulse', 'community', 'nonprofit', 'yes'],
+  // Headlines in other languages: shown as published, labeled, never grouped or translated.
+  ['gaceta-corvane', 'Gaceta de Corvane', 'AR', 'world', 'reporting', 'private', 'yes'],
+  ['correo-briskvale', 'Correo de Briskvale', 'ES', 'world', 'reporting', 'public-broadcaster', 'yes'],
+  ['barid-dunmere', 'Barid Dunmere (بريد دنمير)', 'JO', 'world', 'reporting', 'independent', 'unknown'],
 ];
+
+/** Sources whose headlines are not in English (BCP 47); every other fixture source is 'en'. */
+const LANGUAGE = new Map<string, string>([['gaceta-corvane', 'es'], ['correo-briskvale', 'es-ES'], ['barid-dunmere', 'ar']]);
 
 const FIRST_SUB: Record<SectionId, Subsection> = {
   us: 'national', world: 'world-general', markets: 'global-markets', outside: 'independent', airwaves: 'podcasts', pulse: 'discussions',
@@ -41,7 +48,7 @@ const FIRST_SUB: Record<SectionId, Subsection> = {
 
 export function fixtureSources(): SourceEntry[] {
   return SOURCES.map(([id, name, country, section, contentType, affiliation, syndication]) => ({
-    id, name, homepage: `https://${id}.example/`, country, region: 'Fixture', language: 'en', section, contentType, affiliation,
+    id, name, homepage: `https://${id}.example/`, country, region: 'Fixture', language: LANGUAGE.get(id) ?? 'en', section, contentType, affiliation,
     ownership: 'Fictional publisher', intervalMinutes: 15,
     feeds: [{ url: `https://${id}.example/feed.xml`, kind: section === 'airwaves' ? 'podcast' : 'rss', subsection: FIRST_SUB[section] }],
     status: 'READY', statusNote: 'Synthetic test source.', gates: [], termsUrl: `https://${id}.example/terms`,
@@ -63,9 +70,9 @@ function art(sourceId: string, sub: Subsection, hoursAgo: number, title: string,
   seq++;
   const id = `fx${String(seq).padStart(4, '0')}`;
   return {
-    id, sourceId, title, url: `https://${sourceId}.example/news/${id}`, publishedAt: at(hoursAgo), fetchedAt: FIXTURE_NOW.toISOString(),
+    id, sourceId, title, url: `https://${sourceId}.example/news/${id}`, publishedAt: at(hoursAgo), firstSeenAt: FIXTURE_NOW.toISOString(),
     section: SECTION_OF_SUB[sub], subsection: sub, contentType: typeOf.get(sourceId) ?? 'reporting', country: country.get(sourceId) ?? 'US',
-    language: 'en', ...extra,
+    language: LANGUAGE.get(sourceId) ?? 'en', ...extra,
   };
 }
 
@@ -139,6 +146,11 @@ export function fixtureArticles(): Article[] {
     }),
     art('most-read', 'reading', 12.0, 'Lake Varnu', { community: { platform: 'Encyclopedia Most Read', origin: 'most-read.example', points: 120000 } }),
     ...filler(),
+    // The lead story as outlets in other languages headlined it. The two Spanish headlines say the
+    // same thing in nearly the same words; they still stay apart (grouping reads English only).
+    art('gaceta-corvane', 'africa-americas', 2.5, 'Naufraga un ferri en el lago Varnu: al menos 31 muertos'),
+    art('correo-briskvale', 'europe', 2.3, 'Al menos 31 muertos al naufragar un ferri en el lago Varnu'),
+    art('barid-dunmere', 'mideast', 2.1, 'غرق عبّارة في بحيرة فارنو ومقتل 31 شخصاً'),
   ];
 }
 

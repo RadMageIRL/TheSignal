@@ -5,6 +5,7 @@ import { absoluteTime, duration, shortAge } from '../lib/time.ts';
 import type { SourceMeta, View } from '../lib/data.ts';
 import { clusterArticles } from '../lib/data.ts';
 import { copyNotes } from '../../shared/cluster.ts';
+import { headlineLangAttrs, isEnglish, languageName } from '../../shared/languages.ts';
 
 export interface Ctx {
   view: View;
@@ -25,6 +26,7 @@ export function Meta({ a, ctx, showCountry = true }: { a: Article; ctx: Ctx; sho
     <span className="meta">
       <span className="pub">{s?.name ?? a.sourceId}</span>
       {showCountry && <abbr className="cc" title={countryName(a.country)}>{a.country}</abbr>}
+      {!isEnglish(a.language) && <span className="lang-tag" title={`Headline in ${languageName(a.language)}, as published (not translated)`}>{languageName(a.language)}</span>}
       {a.publishedAt && (
         <time dateTime={a.publishedAt} title={absoluteTime(a.publishedAt)}>{shortAge(a.publishedAt, ctx.nowMs)}</time>
       )}
@@ -48,7 +50,7 @@ export function StoryItem({ clusterId, articleId, ctx, size = 'normal' }: {
   const others = cid ? clusterArticles(ctx.view, cid).filter((a) => a.id !== lead.id) : [];
   return (
     <li className={`story story-${size}`}>
-      <a className="headline" href={lead.url} rel="noopener noreferrer" target="_blank">{lead.title}</a>
+      <a className="headline" href={lead.url} rel="noopener noreferrer" target="_blank" {...headlineLangAttrs(lead.language)}>{lead.title}</a>
       <div className="story-meta">
         <TypeBadge type={lead.contentType} />
         <Meta a={lead} ctx={ctx} />
@@ -62,7 +64,7 @@ export function StoryItem({ clusterId, articleId, ctx, size = 'normal' }: {
         <ul className="related-list" id={panelId}>
           {others.map((a) => (
             <li key={a.id}>
-              <a href={a.url} rel="noopener noreferrer" target="_blank">{a.title}</a>
+              <a href={a.url} rel="noopener noreferrer" target="_blank" {...headlineLangAttrs(a.language)}>{a.title}</a>
               <Meta a={a} ctx={ctx} />
             </li>
           ))}
@@ -97,14 +99,16 @@ export function PerspectivesTable({ clusterId, ctx }: { clusterId: string; ctx: 
                 <span className="own">{AFFILIATION_LABEL[s?.affiliation ?? 'unknown']}{s?.ownership ? `: ${s.ownership}` : ''}</span>
               </td>
               <td className="persp-headline">
-                <a href={a.url} rel="noopener noreferrer" target="_blank">{a.title}</a>
+                <a href={a.url} rel="noopener noreferrer" target="_blank" {...headlineLangAttrs(a.language)}>{a.title}</a>
                 <span className="persp-type">
                   {TYPE_LABEL[a.contentType]}{a.wire ? `, credits ${a.wire}` : ''}
                   {notes.get(a.id)?.sameAs && <span className="copy-note">Same headline as {ctx.sources.get(ctx.view.articles.get(notes.get(a.id)!.sameAs!)?.sourceId ?? '')?.name ?? 'another outlet'}</span>}
                 </span>
               </td>
               <td className="persp-time">
-                {a.publishedAt ? <time dateTime={a.publishedAt}>{absoluteTime(a.publishedAt)}</time> : 'Not given'}
+                {a.publishedAt
+                  ? <time dateTime={a.publishedAt}>{absoluteTime(a.publishedAt)}</time>
+                  : <>Not given; first seen <time dateTime={a.firstSeenAt}>{absoluteTime(a.firstSeenAt)}</time></>}
               </td>
             </tr>
           );
@@ -118,7 +122,7 @@ export function EpisodeItem({ a, ctx }: { a: Article; ctx: Ctx }) {
   return (
     <li className="story episode">
       <span className="show">{a.podcast?.show}</span>
-      <a className="headline" href={a.url} rel="noopener noreferrer" target="_blank">{a.title}</a>
+      <a className="headline" href={a.url} rel="noopener noreferrer" target="_blank" {...headlineLangAttrs(a.language)}>{a.title}</a>
       <div className="story-meta">
         <span className="meta">
           {a.podcast?.guest && <span>with {a.podcast.guest}</span>}
@@ -137,7 +141,7 @@ export function PulseItem({ a, ctx }: { a: Article; ctx: Ctx }) {
   if (c?.comments) counts.push(`${c.comments} comments`);
   return (
     <li className="story pulse-item">
-      <a className="headline" href={a.url} rel="noopener noreferrer" target="_blank">{a.title}</a>
+      <a className="headline" href={a.url} rel="noopener noreferrer" target="_blank" {...headlineLangAttrs(a.language)}>{a.title}</a>
       <div className="story-meta">
         <span className="meta">
           <span className="pub">{c?.platform}</span>

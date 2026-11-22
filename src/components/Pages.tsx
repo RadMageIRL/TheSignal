@@ -101,6 +101,12 @@ export function AboutPage() {
         deliberately cautious: it would rather show the same event twice than wrongly merge two different events. Dates and
         common words never count as distinctive.
       </p>
+      <p>
+        Grouping reads English headlines only. A headline in another language is shown exactly as its publisher wrote it,
+        labeled with its language, and listed on its own as a story with one outlet, even when English headlines cover the
+        same event. The Signal does not translate headlines. You can search by language, and you can hide a language from
+        the page in Preferences.
+      </p>
 
       <h2>How the page is ordered</h2>
       <p>The default page is the same for everyone. Each story's score combines:</p>
@@ -173,10 +179,18 @@ export function AboutPage() {
         collector identifies itself to publishers with this address in its User-Agent.
       </p>
 
+      <h2>Privacy</h2>
+      <p>
+        The Signal has no accounts, no cookies, no advertising and no analytics, and loads nothing from other sites. Your
+        preferences (hidden sources and languages, display choices) are kept only in your own browser. The hosting provider
+        processes the usual request logs, including IP addresses, to run and protect the service. A headline link takes you to
+        its publisher, whose own privacy policy applies there.
+      </p>
+
       <h2>Limits</h2>
       <ul>
-        <li>Grouping works on English headlines only and will miss stories worded very differently.</li>
-        <li>Some publishers do not give publication times; those headlines show no time.</li>
+        <li>Grouping works on English headlines only and will miss stories worded very differently. Headlines in other languages are never grouped, so they do not add to a story's outlet or country count.</li>
+        <li>Some publishers do not give publication times, and a few give times that cannot be right (in the future, or later than The Signal first saw the item). Those headlines show no publication time and are ordered and aged by when The Signal first saw them.</li>
         <li>Feeds are only as current as their publishers make them.</li>
       </ul>
     </main>

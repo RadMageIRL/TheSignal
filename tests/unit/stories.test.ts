@@ -9,7 +9,7 @@ import { buildFixtureFiles } from '../../tools/make-fixture.ts';
 import { SECTION_ORDER } from '../../shared/labels.ts';
 
 describe('shared copy', () => {
-  const base = { publishedAt: '2026-11-22T10:00:00Z', fetchedAt: '2026-11-22T12:00:00Z' };
+  const base = { publishedAt: '2026-11-22T10:00:00Z', firstSeenAt: '2026-11-22T12:00:00Z' };
 
   it('marks a word-for-word headline from a different outlet as the same headline as the earlier one', () => {
     const arts = [

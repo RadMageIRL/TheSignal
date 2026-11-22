@@ -16,5 +16,5 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["src", "shared", "ingest", "tools", "tests", "vite.config.ts", "playwright.config.ts"]
+  "include": ["src", "shared", "ingest", "api", "tools", "tests", "vite.config.ts", "playwright.config.ts"]
 }

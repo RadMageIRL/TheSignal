@@ -4,6 +4,7 @@
 import type { Permission, SourceEntry, SourceStatus, PublicSource } from './types.ts';
 import { SECTION_SUBS } from './layout.ts';
 import { COUNTRY_NAMES } from './countries.ts';
+import { knownLanguage } from './languages.ts';
 
 const STATUSES: SourceStatus[] = ['READY', 'RESEARCH', 'CONDITIONAL', 'DEFERRED', 'UNAVAILABLE'];
 const PERMISSIONS: Permission[] = ['yes', 'no', 'unknown'];
@@ -51,6 +52,7 @@ export function validateRegistry(list: SourceEntry[]): string[] {
     if (!s.name?.trim()) out.push(`${at} name is empty`);
     if (!httpsUrl(s.homepage)) out.push(`${at} homepage must be an https URL`);
     if (!(s.country in COUNTRY_NAMES)) out.push(`${at} unknown country code ${s.country}`);
+    if (!knownLanguage(s.language ?? '')) out.push(`${at} language ${s.language} has no name in shared/languages.ts`);
     if (!(s.section in SECTION_SUBS)) out.push(`${at} unknown section ${s.section}`);
     if (!TYPES.includes(s.contentType)) out.push(`${at} unknown content type ${s.contentType}`);
     if (!AFFILIATIONS.includes(s.affiliation)) out.push(`${at} unknown affiliation ${s.affiliation}`);

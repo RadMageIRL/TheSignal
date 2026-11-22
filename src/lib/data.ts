@@ -4,6 +4,8 @@ import type { Article, Cluster, Snapshot } from '../../shared/types.ts';
 import { decodeArticles, decodeClusters, type WireSnapshot } from '../../shared/wire.ts';
 import { parseWire } from '../../shared/schema.ts';
 import { buildLayout, type PageLayout } from '../../shared/layout.ts';
+import { primaryLanguage } from '../../shared/languages.ts';
+import type { Prefs } from './prefs.ts';
 
 export type SourceMeta = Snapshot['sources'][number];
 
@@ -49,6 +51,16 @@ export function buildView(d: SiteData, disabled: Set<string>): View {
   }
   const visible = new Map([...d.articles].filter(([, a]) => !disabled.has(a.sourceId)));
   return { ...buildLayout(visible, d.baseClusters, nowMs), articles: visible };
+}
+
+/** Sources left off the page: the ones the reader turned off, and every source in a language the reader hid. */
+export function offSources(d: Pick<SiteData, 'sources'>, p: Pick<Prefs, 'disabledSources' | 'hiddenLanguages'>): Set<string> {
+  const off = new Set(p.disabledSources);
+  if (p.hiddenLanguages.length > 0) {
+    const hide = new Set(p.hiddenLanguages);
+    for (const s of d.sources.values()) if (hide.has(primaryLanguage(s.language))) off.add(s.id);
+  }
+  return off;
 }
 
 export function clusterArticles(view: View, id: string): Article[] {

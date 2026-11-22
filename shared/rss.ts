@@ -15,6 +15,7 @@ import { SECTION_TITLES, SUB_TITLES } from './labels.ts';
 import { TYPE_LABEL, countryName } from './countries.ts';
 import { safeLink } from './url.ts';
 import { NOT_A_COUNTRY, normalizeTitle, pickLead } from './cluster.ts';
+import { isEnglish, languageName } from './languages.ts';
 
 const BS = String.fromCharCode(92);
 const u = (hex: string) => BS + 'u' + hex;
@@ -63,7 +64,7 @@ export interface RssContext {
 
 interface Entry { a: Article; note: string }
 
-const time = (a: Article) => Date.parse(a.publishedAt ?? a.fetchedAt);
+const time = (a: Article) => Date.parse(a.publishedAt ?? a.firstSeenAt);
 const newestFirst = (x: Article, y: Article) => time(y) - time(x) || (x.id < y.id ? -1 : 1);
 
 /** One item. `link` has already passed safeLink. */
@@ -79,7 +80,12 @@ function itemXml(e: Entry, link: string, src: PublicSource, ctx: RssContext): st
   parts.push(`<description>${escapeXml(e.note)}</description>`);
   const cats = [SECTION_TITLES[e.a.section], SUB_TITLES[e.a.subsection], countryName(e.a.country)];
   if (BADGE.has(e.a.contentType)) cats.push(TYPE_LABEL[e.a.contentType] ?? e.a.contentType);
+  // The channel is in English; an item whose headline is in another language says which one.
+  // The headline itself is never translated.
+  const foreign = !isEnglish(e.a.language);
+  if (foreign) cats.push(languageName(e.a.language));
   for (const c of [...new Set(cats.filter(Boolean))]) parts.push(`<category>${escapeXml(c)}</category>`);
+  if (foreign) parts.push(`<dc:language>${escapeXml(e.a.language)}</dc:language>`);
   const from = safeLink(ctx.feedUrlOf(src.id) ?? '');
   if (from) parts.push(`<source url="${escapeXml(from)}">${escapeXml(src.name)}</source>`);
   return `<item>${parts.join('')}</item>`;
@@ -102,7 +108,7 @@ function channel(spec: FeedSpec, snap: Snapshot, items: string[]): string {
   const page = IDENTITY.website + (spec.anchor || '');
   const proto = snap.mode === 'prototype' ? ' Prototype capture for review; not a live feed.' : '';
   return '<?xml version="1.0" encoding="UTF-8"?>\n'
-    + '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n<channel>\n'
+    + '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">\n<channel>\n'
     + `<title>${escapeXml(title)}</title>\n`
     + `<link>${escapeXml(page)}</link>\n`
     + `<description>${escapeXml(spec.description + ' Headlines link to their publishers; The Signal hosts no articles.' + proto)}</description>\n`

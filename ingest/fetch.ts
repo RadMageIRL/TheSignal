@@ -11,6 +11,30 @@ export interface FetchPolicy {
   userAgent: string;
   timeoutMs: number;
   maxBytes: number;
+  /** Test seam: replaces the DNS lookup used for the private-address check. */
+  resolve?: (host: string) => Promise<{ address: string }[]>;
+  /** Told about every request actually sent, redirect hops included (the operations log's request ledger). */
+  observe?: (e: RequestEvent) => void;
+  /** Clock for RequestEvent.sentAt (default Date.now), so pacing and the ledger share one time base. */
+  now?: () => number;
+}
+
+/**
+ * One HTTP request: reported once as it is sent ("sent") and once when it ends ("done"). `url` is
+ * the request the fetch started with, `target` this hop's URL.
+ */
+export interface RequestEvent {
+  phase: 'sent' | 'done';
+  url: string;
+  target: string;
+  hop: number;
+  /** When the request was sent (policy.now, default Date.now). */
+  sentAt: number;
+  userAgent: string;
+  /** "done" only: HTTP status, or 0 for a network error or timeout. */
+  status?: number;
+  ms?: number;
+  error?: string;
 }
 
 export interface FetchOptions {
@@ -20,7 +44,15 @@ export interface FetchOptions {
   allowTruncate?: boolean;
   /** Source-specific User-Agent (see shared/identity.ts); defaults to the policy's. */
   userAgent?: string;
+  /**
+   * Asked before a redirect is followed, with the next hop's URL; a non-null answer stops the
+   * fetch with that reason before anything is requested from the new location. The collector
+   * uses it to evaluate robots.txt for every hop (see ingest/robots.ts).
+   */
+  permitRedirect?: (next: URL) => Promise<string | null>;
 }
+
+export type Fetcher = (url: string, policy: FetchPolicy, opts: FetchOptions) => Promise<FetchOutcome>;
 
 export interface FetchOutcome {
   url: string;
@@ -33,6 +65,8 @@ export interface FetchOutcome {
   etag?: string;
   lastModified?: string;
   contentType?: string;
+  /** The Retry-After header, when the answer had one. */
+  retryAfter?: string;
   ms: number;
   truncated?: boolean;
   error?: string;
@@ -55,7 +89,7 @@ export async function checkHost(url: URL, policy: FetchPolicy): Promise<string |
   if (!policy.allowHosts.has(host)) return `host not on allowlist: ${host}`;
   if (isIP(host)) return 'raw IP hosts are not allowed';
   try {
-    const addrs = await lookup(host, { all: true });
+    const addrs = policy.resolve ? await policy.resolve(host) : await lookup(host, { all: true });
     if (addrs.length === 0) return 'no address';
     if (addrs.some((a) => isPrivateAddress(a.address))) return 'resolves to a private address';
   } catch {
@@ -107,17 +141,31 @@ export async function fetchFeed(
   const base: FetchOutcome = { url, finalUrl: url, status: 0, ok: false, notModified: false, body: '', bytes: 0, ms: 0 };
   let current = new URL(url);
   const signal = AbortSignal.timeout(policy.timeoutMs);
+  const clock = policy.now ?? Date.now;
+  let inFlight: { target: string; hop: number; sentAt: number; userAgent: string } | null = null;
+  const seen = (status: number, error?: string) => {
+    if (!inFlight) return;
+    policy.observe?.({ phase: 'done', url, ...inFlight, status, ms: clock() - inFlight.sentAt, error });
+    inFlight = null;
+  };
   try {
     for (let hop = 0; hop <= 3; hop++) {
       const bad = await checkHost(current, policy);
       if (bad) return { ...base, finalUrl: current.toString(), error: bad, ms: Date.now() - started };
+      if (hop > 0 && validators.permitRedirect) {
+        const refused = await validators.permitRedirect(current);
+        if (refused) return { ...base, finalUrl: current.toString(), error: refused, ms: Date.now() - started };
+      }
       const headers: Record<string, string> = {
         'user-agent': validators.userAgent ?? policy.userAgent,
         accept: 'application/rss+xml, application/atom+xml, application/xml;q=0.9, text/xml;q=0.9, application/json;q=0.8, */*;q=0.5',
       };
       if (hop === 0 && validators.etag) headers['if-none-match'] = validators.etag;
       if (hop === 0 && validators.lastModified) headers['if-modified-since'] = validators.lastModified;
+      inFlight = { target: current.toString(), hop, sentAt: clock(), userAgent: headers['user-agent']! };
+      policy.observe?.({ phase: 'sent', url, ...inFlight });
       const res = await fetch(current, { headers, redirect: 'manual', signal });
+      seen(res.status);
       if (res.status >= 300 && res.status < 400 && res.status !== 304) {
         const loc = res.headers.get('location');
         await res.body?.cancel();
@@ -131,6 +179,7 @@ export async function fetchFeed(
         etag: res.headers.get('etag') ?? undefined,
         lastModified: res.headers.get('last-modified') ?? undefined,
         contentType: res.headers.get('content-type') ?? undefined,
+        retryAfter: res.headers.get('retry-after') ?? undefined,
       };
       if (res.status === 304) {
         await res.body?.cancel();
@@ -147,8 +196,14 @@ export async function fetchFeed(
     return { ...base, error: 'too many redirects', ms: Date.now() - started };
   } catch (e) {
     const msg = e instanceof Error ? (e.name === 'TimeoutError' ? 'timeout' : e.message) : 'fetch failed';
+    seen(0, msg.slice(0, 160));
     return { ...base, finalUrl: current.toString(), error: msg.slice(0, 160), ms: Date.now() - started };
   }
+}
+
+/** Errors worth one more attempt: network failures and server errors, never policy refusals or 4xx. */
+export function retryable(r: FetchOutcome): boolean {
+  return !r.ok && (r.status >= 500 || r.status === 0) && !/allowlist|private|scheme|raw IP|over \d+ bytes|robots\.txt/.test(r.error ?? '');
 }
 
 /** Run tasks with a global concurrency limit and a per-host limit. */

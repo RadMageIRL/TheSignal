@@ -46,6 +46,7 @@ function articleProblem(a: unknown, sources: Set<string>): string | null {
   if (!isStr(a.t, SCHEMA_LIMITS.maxTitle) || !a.t.trim()) return 'bad title';
   if (!safeLink(a.u)) return 'unsafe link';
   if (a.p !== null && !isIso(a.p)) return 'bad date';
+  if (a.f !== undefined && !isIso(a.f)) return 'bad first-seen time';
   if (!SUBS.has(String(a.b))) return 'bad list';
   if (a.x !== undefined && !safeLink(a.x)) return 'unsafe discussion link';
   if (!isCount(a.d) || !isCount(a.n) || !isCount(a.c)) return 'bad count';

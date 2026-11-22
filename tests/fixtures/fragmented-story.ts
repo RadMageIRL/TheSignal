@@ -11,7 +11,7 @@ function a(sourceId: string, country: string, hoursAgo: number, title: string, s
   n++;
   return {
     id: `fr${n}`, sourceId, title, url: `https://${sourceId}.example/a/${n}`,
-    publishedAt: new Date(NOW - hoursAgo * 3600_000).toISOString(), fetchedAt: new Date(NOW).toISOString(),
+    publishedAt: new Date(NOW - hoursAgo * 3600_000).toISOString(), firstSeenAt: new Date(NOW).toISOString(),
     section: 'world', subsection: 'world-general', contentType: 'reporting', country, language: 'en', story,
   };
 }

@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, normalize, sep } from 'node:path';
 import { JSON_CONTENT_TYPE, RSS_CONTENT_TYPE, etagOf, isNotModified, rssBuildDate } from './tools/http-cache.ts';
+import { securityHeaders } from './tools/security-headers.ts';
 
 // Local review only: serve a site folder (snapshot.json, rss.xml, rss/*.xml) at /signal/.
 // SIGNAL_SITE names the folder; otherwise a private capture in local/site-data/current is used
@@ -74,6 +75,9 @@ export default defineConfig({
     sourcemap: false,
   },
   server: { host: '127.0.0.1', port: 4390, strictPort: true },
+  // The preview serves the built site under the production security headers, so the browser tests
+  // exercise the real Content-Security-Policy.
+  preview: { headers: existsSync('dist/index.html') ? securityHeaders(readFileSync('dist/index.html', 'utf8')) : {} },
   test: {
     include: ['tests/unit/**/*.test.ts'],
   },

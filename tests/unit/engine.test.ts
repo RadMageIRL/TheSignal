@@ -13,7 +13,7 @@ function art(p: Partial<Article> & { title: string; sourceId: string }): Article
   n++;
   return {
     id: p.id ?? `a${n}`, url: p.url ?? `https://${p.sourceId}.example/${n}`, publishedAt: p.publishedAt ?? '2026-11-22T10:00:00Z',
-    fetchedAt: '2026-11-22T12:00:00Z', section: (p.section ?? 'world') as SectionId, subsection: (p.subsection ?? 'world-general') as Subsection,
+    firstSeenAt: '2026-11-22T12:00:00Z', section: (p.section ?? 'world') as SectionId, subsection: (p.subsection ?? 'world-general') as Subsection,
     contentType: p.contentType ?? 'reporting', country: p.country ?? 'GB', language: 'en', ...p,
   };
 }

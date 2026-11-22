@@ -9,6 +9,7 @@ import { absoluteTime, relativeTime } from '../lib/time.ts';
 import { clusterArticles } from '../lib/data.ts';
 import { EpisodeItem, Meta, PerspectivesTable, PulseItem, StoryItem, TypeBadge, type Ctx } from './Story.tsx';
 import { RssLink } from './Rss.tsx';
+import { headlineLangAttrs } from '../../shared/languages.ts';
 
 export { SECTION_TITLES, SUB_TITLES };
 
@@ -38,7 +39,7 @@ export function Lead({ id, ctx }: { id: string; ctx: Ctx }) {
         {copies > 0 && <span>{copies} with shared wire or identical copy</span>}
       </p>
       <h2 id="lead-h" className="lead-headline">
-        <a href={lead.url} rel="noopener noreferrer" target="_blank">{lead.title}</a>
+        <a href={lead.url} rel="noopener noreferrer" target="_blank" {...headlineLangAttrs(lead.language)}>{lead.title}</a>
       </h2>
       <p className="lead-meta">
         <TypeBadge type={lead.contentType} />
@@ -100,7 +101,21 @@ export function NewsColumn({ section, ctx }: { section: SectionId; ctx: Ctx }) {
 
 export function PerspectivesBand({ ctx }: { ctx: Ctx }) {
   const ids = ctx.view.perspectives;
-  if (ids.length === 0) return null;
+  if (ids.length === 0) {
+    // Shown rather than hidden, so the menu link lands somewhere and says why it is empty.
+    return (
+      <section className="band perspectives" id="perspectives" aria-labelledby="persp-h">
+        <div className="band-head">
+          <h2 id="persp-h" className="band-title">Global Perspectives</h2>
+          <p className="band-note persp-empty">
+            No story in this snapshot was reported by outlets in three or more countries whose headlines The Signal may show, so
+            there is nothing to compare yet. This section fills in as more international publishers are cleared; stories are
+            never grouped on weaker evidence to fill it.
+          </p>
+        </div>
+      </section>
+    );
+  }
   return (
     <section className="band perspectives" id="perspectives" aria-labelledby="persp-h">
       <div className="band-head">
@@ -120,7 +135,7 @@ export function PerspectivesBand({ ctx }: { ctx: Ctx }) {
                 {[...byCountry.entries()].slice(0, 6).map(([cc, list]) => (
                   <li key={cc}>
                     <abbr className="cc" title={countryName(cc)}>{cc}</abbr>
-                    <a href={list[0]!.url} rel="noopener noreferrer" target="_blank">{list[0]!.title}</a>
+                    <a href={list[0]!.url} rel="noopener noreferrer" target="_blank" {...headlineLangAttrs(list[0]!.language)}>{list[0]!.title}</a>
                     <Meta a={list[0]!} ctx={ctx} showCountry={false} />
                   </li>
                 ))}
@@ -145,7 +160,7 @@ export function Trending({ ctx }: { ctx: Ctx }) {
           const a = ctx.view.articles.get(c.leadArticleId)!;
           return (
             <li key={id}>
-              <a href={a.url} rel="noopener noreferrer" target="_blank">{a.title}</a>
+              <a href={a.url} rel="noopener noreferrer" target="_blank" {...headlineLangAttrs(a.language)}>{a.title}</a>
               <span className="meta"><span className="pub">{ctx.sources.get(a.sourceId)?.name}</span><span>{plural(c.sourceCount, 'outlet', 'outlets')}</span></span>
             </li>
           );
@@ -164,7 +179,7 @@ export function Breaking({ ctx }: { ctx: Ctx }) {
   return (
     <div className="breaking" role="region" aria-label="Developing story">
       <span className="breaking-label">Developing</span>
-      <a href={a.url} rel="noopener noreferrer" target="_blank">{a.title}</a>
+      <a href={a.url} rel="noopener noreferrer" target="_blank" {...headlineLangAttrs(a.language)}>{a.title}</a>
       <span className="meta">{plural(c.sourceCount, 'outlet', 'outlets')} in {plural(c.countryCount, 'country', 'countries')} since {absoluteTime(c.firstSeen)}</span>
     </div>
   );

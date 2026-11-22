@@ -11,9 +11,11 @@ export interface Prefs {
   density: Density;
   hiddenSections: SectionId[];
   disabledSources: string[];
+  /** Primary language subtags ('es', 'ar', ...) whose headlines are left off the page. */
+  hiddenLanguages: string[];
 }
 
-export const DEFAULT_PREFS: Prefs = { v: 1, theme: 'dark', density: 'compact', hiddenSections: [], disabledSources: [] };
+export const DEFAULT_PREFS: Prefs = { v: 1, theme: 'dark', density: 'compact', hiddenSections: [], disabledSources: [], hiddenLanguages: [] };
 
 const KEY = 'the-signal:prefs:v1';
 const SECTIONS: SectionId[] = ['us', 'world', 'markets', 'outside', 'airwaves', 'pulse'];
@@ -29,6 +31,7 @@ export function loadPrefs(): Prefs {
       density: p.density === 'comfortable' ? 'comfortable' : 'compact',
       hiddenSections: Array.isArray(p.hiddenSections) ? p.hiddenSections.filter((s): s is SectionId => SECTIONS.includes(s as SectionId)) : [],
       disabledSources: Array.isArray(p.disabledSources) ? p.disabledSources.filter((s) => typeof s === 'string').slice(0, 500) : [],
+      hiddenLanguages: Array.isArray(p.hiddenLanguages) ? p.hiddenLanguages.filter((s) => typeof s === 'string' && /^[a-z]{2,3}$/.test(s)).slice(0, 50) : [],
     };
   } catch {
     return DEFAULT_PREFS;

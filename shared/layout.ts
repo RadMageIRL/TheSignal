@@ -46,7 +46,7 @@ const PULSE_PER_PLATFORM = 5;
 const PER_PUBLISHER_PER_LIST = 2;
 const PER_COUNTRY_PER_LIST = 3;
 
-const t = (a: Article) => Date.parse(a.publishedAt ?? a.fetchedAt);
+const t = (a: Article) => Date.parse(a.publishedAt ?? a.firstSeenAt);
 
 /** Recompute a cluster's counts and lead from the articles that are still visible. */
 export function summarizeCluster(base: Cluster, arts: Article[]): Cluster | null {

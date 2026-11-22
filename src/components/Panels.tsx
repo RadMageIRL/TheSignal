@@ -5,6 +5,7 @@ import type { SiteData } from '../lib/data.ts';
 import { SECTION_TITLES } from '../../shared/labels.ts';
 import { DEFAULT_FILTERS, RESULT_LIMIT, searchArticles, type SearchFilters, type SortOrder, type Within } from '../lib/search.ts';
 import { Meta, type Ctx } from './Story.tsx';
+import { headlineLangAttrs, languageName, primaryLanguage } from '../../shared/languages.ts';
 
 const SECTIONS: SectionId[] = ['us', 'world', 'markets', 'outside', 'airwaves', 'pulse'];
 
@@ -21,7 +22,11 @@ export function PreferencesPanel({ prefs, data, onChange, onClose }: {
   }, [onClose]);
   const disabled = new Set(prefs.disabledSources);
   const hidden = new Set(prefs.hiddenSections);
+  const hiddenLangs = new Set(prefs.hiddenLanguages);
   const sources = data ? [...data.sources.values()] : [];
+  // Languages among the sources, English first, then by name, with how many sources each has.
+  const langs = [...sources.reduce((m, s) => m.set(primaryLanguage(s.language), (m.get(primaryLanguage(s.language)) ?? 0) + 1), new Map<string, number>())]
+    .sort(([a], [b]) => (a === 'en' ? -1 : b === 'en' ? 1 : languageName(a).localeCompare(languageName(b))));
   const f = filter.trim().toLowerCase();
   const toggleSource = (id: string) => {
     const next = new Set(disabled);
@@ -61,6 +66,22 @@ export function PreferencesPanel({ prefs, data, onChange, onClose }: {
             </label>
           ))}
         </fieldset>
+        {langs.length > 1 && (
+          <fieldset>
+            <legend>Languages</legend>
+            <p className="drawer-note">Headlines are always shown as published, never translated.</p>
+            {langs.map(([l, n]) => (
+              <label key={l} className="choice">
+                <input type="checkbox" checked={!hiddenLangs.has(l)} onChange={() => {
+                  const next = new Set(hiddenLangs);
+                  if (next.has(l)) next.delete(l); else next.add(l);
+                  onChange({ ...prefs, hiddenLanguages: [...next] });
+                }} />
+                {languageName(l)} <span className="cc">{n} {n === 1 ? 'source' : 'sources'}</span>
+              </label>
+            ))}
+          </fieldset>
+        )}
         <fieldset className="source-prefs">
           <legend>Sources ({sources.length - sources.filter((s) => disabled.has(s.id)).length} of {sources.length} on)</legend>
           <label htmlFor="srcfilter" className="sr-only">Filter sources</label>
@@ -120,6 +141,12 @@ export function SearchResults({ query, ctx, filters, onFilters, onClear }: {
             {r.facets.countries.map((f) => <option key={f.value} value={f.value}>{f.label} ({f.count})</option>)}
           </select>
         </label>
+        <label>Language
+          <select value={filters.language} onChange={(e) => set('language', e.target.value)}>
+            <option value="all">All languages</option>
+            {r.facets.languages.map((f) => <option key={f.value} value={f.value}>{f.label} ({f.count})</option>)}
+          </select>
+        </label>
         <label>Published
           <select value={filters.within} onChange={(e) => set('within', e.target.value as Within)}>
             <option value="any">Any time</option>
@@ -140,7 +167,7 @@ export function SearchResults({ query, ctx, filters, onFilters, onClear }: {
       <ul className="stories">
         {r.results.map((a) => (
           <li className="story" key={a.id}>
-            <a className="headline" href={a.url} rel="noopener noreferrer" target="_blank">{a.title}</a>
+            <a className="headline" href={a.url} rel="noopener noreferrer" target="_blank" {...headlineLangAttrs(a.language)}>{a.title}</a>
             <div className="story-meta"><span className="section-tag">{SECTION_TITLES[a.section]}</span><Meta a={a} ctx={ctx} /></div>
           </li>
         ))}

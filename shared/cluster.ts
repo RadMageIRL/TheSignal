@@ -92,7 +92,7 @@ export function placesConflict(a: string[], b: string[]): boolean {
 interface Doc { a: Article; t: number; tokens: string[]; weight: Map<string, number>; norm: number; key: string }
 
 function timeOf(a: Article): number {
-  return Date.parse(a.publishedAt ?? a.fetchedAt);
+  return Date.parse(a.publishedAt ?? a.firstSeenAt);
 }
 
 export function similarity(x: Doc, y: Doc): number {
@@ -148,7 +148,7 @@ export interface CopyNote {
   sameAs?: string;
 }
 
-type CopyInput = Pick<Article, 'id' | 'sourceId' | 'wire' | 'title' | 'publishedAt' | 'fetchedAt'>;
+type CopyInput = Pick<Article, 'id' | 'sourceId' | 'wire' | 'title' | 'publishedAt' | 'firstSeenAt'>;
 
 /**
  * What the metadata identifies as shared copy inside one story. An item without a note is not

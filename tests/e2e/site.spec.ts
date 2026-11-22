@@ -9,6 +9,27 @@ async function open(page: Page, hash = '') {
   if (!hash) await expect(page.locator('.lead-headline')).toBeVisible();
 }
 
+test.describe('production security headers', () => {
+  test('the page is served with the production Content-Security-Policy and runs without violating it', async ({ page }) => {
+    const violations: string[] = [];
+    page.on('console', (m) => { if (/Content[- ]Security[- ]Policy|Refused to/i.test(m.text())) violations.push(m.text()); });
+    const res = await page.goto('./');
+    const h = res!.headers();
+    expect(h['content-security-policy']).toContain("default-src 'none'");
+    expect(h['content-security-policy']).toMatch(/script-src 'self' 'sha256-[A-Za-z0-9+/=]+'/);
+    expect(h['x-content-type-options']).toBe('nosniff');
+    expect(h['x-frame-options']).toBe('DENY');
+    await expect(page.locator('.lead-headline')).toBeVisible();
+    // The inline theme script ran (it sets data-theme from saved preferences before first paint).
+    await page.evaluate((k) => localStorage.setItem(k, JSON.stringify({ theme: 'light' })), PREFS);
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+    await page.getByRole('link', { name: 'Methodology' }).first().click();
+    await expect(page.getByRole('heading', { name: 'Privacy' })).toBeVisible();
+    expect(violations).toEqual([]);
+  });
+});
+
 test.describe('front page', () => {
   test('shows the masthead, the lead story and all six sections', async ({ page }) => {
     await open(page);
@@ -105,14 +126,55 @@ test.describe('search', () => {
   test('finds headlines and narrows them with filters', async ({ page }) => {
     await open(page);
     await page.getByRole('searchbox', { name: 'Search headlines' }).fill('varnu');
-    await expect(page.locator('#sr-h')).toContainText('8 headlines matching "varnu"');
+    await expect(page.locator('#sr-h')).toContainText('10 headlines matching "varnu"');
     await page.getByLabel('Country').selectOption('JP');
     await expect(page.locator('#sr-h')).toContainText('1 headline matching');
     await expect(page.locator('.search-results .story .cc')).toHaveText(['JP']);
     await page.getByRole('button', { name: 'Reset filters' }).click();
-    await expect(page.locator('#sr-h')).toContainText('8 headlines');
+    await expect(page.locator('#sr-h')).toContainText('10 headlines');
     await page.getByRole('button', { name: 'Clear search' }).click();
     await expect(page.locator('.lead-headline')).toBeVisible();
+  });
+});
+
+test.describe('headlines in other languages', () => {
+  test('are shown as published with their language named, marked up for the browser, and filterable', async ({ page }) => {
+    await open(page);
+    const search = page.getByRole('searchbox', { name: 'Search headlines' });
+    await search.fill('varnu');
+    await page.getByLabel('Language').selectOption('es');
+    await expect(page.locator('#sr-h')).toContainText('2 headlines matching');
+    const spanish = page.locator('.search-results .story');
+    await expect(spanish.locator('.lang-tag')).toHaveText(['Spanish', 'Spanish']);
+    await expect(spanish.locator('a.headline')).toHaveText([/31 muertos/, /31 muertos/]);
+    for (const a of await spanish.locator('a.headline').all()) {
+      await expect(a).toHaveAttribute('lang', /^es/);
+      await expect(a).toHaveAttribute('dir', 'auto');
+    }
+    await page.getByRole('button', { name: 'Reset filters' }).click();
+    await search.fill('فارنو');
+    await expect(page.locator('#sr-h')).toContainText('1 headline matching');
+    const arabic = page.locator('.search-results .story a.headline');
+    await expect(arabic).toHaveAttribute('lang', 'ar');
+    await expect(arabic).toHaveAttribute('dir', 'auto');
+    await expect(page.locator('.search-results .story .lang-tag')).toHaveText('Arabic');
+    // English headlines carry no language label and inherit the page language.
+    await search.fill('ocean treaty');
+    await expect(page.locator('.search-results .story .lang-tag')).toHaveCount(0);
+    expect(await page.locator('.search-results .story a.headline').first().getAttribute('lang')).toBeNull();
+  });
+
+  test('can be hidden from the page by language in Preferences, and stay hidden after a reload', async ({ page }) => {
+    await open(page);
+    await page.getByRole('button', { name: 'Preferences' }).first().click();
+    const dialog = page.getByRole('dialog', { name: 'Preferences' });
+    await expect(dialog.getByRole('group', { name: 'Languages' })).toContainText('never translated');
+    await dialog.getByRole('checkbox', { name: /^Spanish/ }).uncheck();
+    await dialog.getByRole('button', { name: 'Close' }).click();
+    await page.reload();
+    await page.getByRole('searchbox', { name: 'Search headlines' }).fill('varnu');
+    await expect(page.locator('#sr-h')).toContainText('8 headlines matching');
+    await expect(page.locator('.lang-tag', { hasText: 'Spanish' })).toHaveCount(0);
   });
 });
 

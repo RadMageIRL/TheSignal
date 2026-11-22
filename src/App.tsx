@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SectionId } from '../shared/types.ts';
-import { buildView, loadSnapshot, type SiteData } from './lib/data.ts';
+import { buildView, loadSnapshot, offSources, type SiteData } from './lib/data.ts';
 import { loadPrefs, resolvedTheme, savePrefs, type Prefs } from './lib/prefs.ts';
 import { Masthead, Nav, TopBar } from './components/Header.tsx';
 import { Breaking, Lead, NewsColumn, PerspectivesBand, Trending } from './components/Sections.tsx';
@@ -59,8 +59,10 @@ export function App() {
   }, []);
 
   const update = useCallback((p: Prefs) => { setPrefs(p); savePrefs(p); }, []);
-  const disabledKey = prefs.disabledSources.slice().sort().join(',');
-  const view = useMemo(() => (data ? buildView(data, new Set(prefs.disabledSources)) : null),
+  // Sources the reader turned off, plus every source in a language the reader chose to hide.
+  const off = data ? offSources(data, prefs) : new Set<string>();
+  const disabledKey = [...off].sort().join(',');
+  const view = useMemo(() => (data ? buildView(data, off) : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, disabledKey]);
   const hidden = new Set<string>(prefs.hiddenSections);

@@ -5,3 +5,5 @@ dist/
 *.log
 test-results/
 playwright-report/
+# Generated at deploy time by tools/vercel-config.ts (holds the Blob store address)
+vercel.json

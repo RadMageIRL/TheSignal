@@ -21,15 +21,21 @@ function fail(url: string, status: number, error: string): FetchOutcome {
   return { url, finalUrl: url, status, ok: false, notModified: false, body: '', bytes: 0, ms: 1, error };
 }
 
-/** A fake network: counts calls per URL and answers with a small valid feed. */
+/**
+ * A fake network: counts calls per feed URL and answers with a small valid feed. robots.txt
+ * requests are answered separately (404, meaning no robots.txt, unless a test says otherwise)
+ * and are not counted as feed calls.
+ */
 function fakeNet(answer?: (url: string, call: number) => FetchOutcome) {
   const calls = new Map<string, number>();
+  let robotsCalls = 0;
   const fetcher: Fetcher = async (url) => {
+    if (new URL(url).pathname === '/robots.txt') { robotsCalls++; return fail(url, 404, 'HTTP 404'); }
     const n = (calls.get(url) ?? 0) + 1;
     calls.set(url, n);
     return answer ? answer(url, n) : ok(url, rss(new URL(url).hostname, 8));
   };
-  return { fetcher, calls, total: () => [...calls.values()].reduce((a, b) => a + b, 0) };
+  return { fetcher, calls, total: () => [...calls.values()].reduce((a, b) => a + b, 0), robotsCalls: () => robotsCalls };
 }
 
 const on = (over: Partial<Controls> = {}): Controls => ({ ...DEFAULT_CONTROLS, ingest: true, retryDelayMs: 0, minArticles: 10, ...over });
@@ -79,6 +85,7 @@ describe('a scheduled run', () => {
     const r = await runCollection(fixtureSources(), { ...DEFAULT_CONTROLS }, NOW, { fetcher: net.fetcher });
     expect(r.status).toBe('suspended');
     expect(net.total()).toBe(0);
+    expect(net.robotsCalls()).toBe(0);
   });
 
   it('publishes a snapshot and feeds when enough sources answer', async () => {
