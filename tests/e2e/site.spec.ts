@@ -227,3 +227,64 @@ test.describe('pages and accessibility', () => {
     }
   }
 });
+
+test.describe('share and support', () => {
+  const URL_ = 'https://radmagelabs.com/signal/';
+  type W = Window & { __shared?: { url?: string; title?: string }; __copied?: string };
+
+  test('offer Share and Buy me a coffee at the top and in the footer, linking to the RadMage Labs support page', async ({ page }) => {
+    await open(page);
+    for (const area of [page.locator('.topbar'), page.locator('.footer')]) {
+      await expect(area.getByRole('button', { name: 'Share', exact: true })).toBeVisible();
+      const coffee = area.getByRole('link', { name: /Buy me a coffee/ });
+      await expect(coffee).toHaveAttribute('href', 'https://buymeacoffee.com/radmageirl');
+      await expect(coffee).toHaveAttribute('target', '_blank');
+      await expect(coffee).toHaveAttribute('rel', /noopener/);
+    }
+  });
+
+  test('share the canonical address through the browser share sheet', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'share', { configurable: true, value: async (d: ShareData) => { (window as W).__shared = d; } });
+      Object.defineProperty(navigator, 'canShare', { configurable: true, value: () => true });
+    });
+    await open(page, '#/about');
+    await page.locator('.topbar').getByRole('button', { name: 'Share', exact: true }).click();
+    await expect.poll(() => page.evaluate(() => (window as W).__shared?.url)).toBe(URL_);
+    await expect(page.locator('.topbar .support-status')).toHaveText('');
+  });
+
+  test('copy the address from the keyboard where there is no share sheet, and say it was copied', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'share', { configurable: true, value: undefined });
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (t: string) => { (window as W).__copied = t; } } });
+    });
+    await open(page);
+    await page.locator('.footer').getByRole('button', { name: 'Share', exact: true }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('.footer .support-status')).toHaveText(`Link copied: ${URL_}`);
+    expect(await page.evaluate(() => (window as W).__copied)).toBe(URL_);
+  });
+
+  test('show the address to copy by hand when copying is refused', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'share', { configurable: true, value: undefined });
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async () => { throw new Error('denied'); } } });
+    });
+    await open(page);
+    await page.locator('.topbar').getByRole('button', { name: 'Share', exact: true }).click();
+    await expect(page.locator('.topbar .support-status')).toHaveText(`Copy this link: ${URL_}`);
+  });
+
+  test('leave the page as it was when the reader closes the share sheet', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'share', { configurable: true, value: async () => { throw new DOMException('closed', 'AbortError'); } });
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (t: string) => { (window as W).__copied = t; } } });
+    });
+    await open(page);
+    await page.locator('.topbar').getByRole('button', { name: 'Share', exact: true }).click();
+    await page.waitForTimeout(200);
+    await expect(page.locator('.topbar .support-status')).toHaveText('');
+    expect(await page.evaluate(() => (window as W).__copied ?? null)).toBeNull();
+  });
+});

@@ -84,7 +84,9 @@ export function AboutPage() {
       <h2>What appears here</h2>
       <p>
         Only headlines, the publisher's name, the publication time and a link to the original article. No article text is copied,
-        and there are no images, accounts, advertising or tracking. Every headline keeps its original wording.
+        and there are no images, accounts, advertising or tracking. Every headline keeps its original wording. Items their
+        publisher labels as sponsored or paid content (&ldquo;Sponsored:&rdquo;, &ldquo;Paid Post:&rdquo;, &ldquo;[Sponsored]&rdquo;) are advertising rather than
+        journalism and are left out.
       </p>
 
       <h2>How headlines are collected</h2>
@@ -114,13 +116,15 @@ export function AboutPage() {
         <li><strong>Recency.</strong> A story's weight halves every {HALF_LIFE_HOURS} hours after its newest report.</li>
         <li><strong>Coverage.</strong> More outlets carrying a story raises it, with shared copy discounted: items that credit the same wire service count once, the same headline syndicated word for word counts once, and several articles from one outlet, or from editions of one publisher that republish each other, count once.</li>
         <li><strong>Geographic reach.</strong> Coverage from more countries raises a story.</li>
-        <li><strong>Type.</strong> Opinion and commentary can appear in news columns but rank below straight reporting. Sports results, personal advice columns, programming notes and roundups rank at about a third of a news story's weight, and reviews at 60 percent; nothing is hidden.</li>
+        <li><strong>Type.</strong> Opinion and commentary can appear in news columns but rank below straight reporting. A headline its publisher labels as opinion or commentary (&ldquo;Opinion:&rdquo;, &ldquo;Commentary |&rdquo;, &ldquo;... - opinion&rdquo;) counts as opinion or commentary even when it arrives in a news feed; only a label at the start or end of a headline counts, never the word inside one. Sports results, personal advice columns, programming notes and roundups rank at about a third of a news story's weight, and reviews at 60 percent; nothing is hidden.</li>
       </ul>
       <p>
         No list shows more than two stories led by the same outlet (or the same family of editions), and the world column shows no
         more than three stories led by outlets from the same country in any region. The lead story is the highest-scoring story
         carried in the last 12 hours by outlets in at least two countries, with at least three reports left after shared copy is
-        counted once. There are no political bias scores and no personalization of the default page.
+        counted once. Until a story qualifies, the lead is the highest-scoring news story, and its outlet count says how many
+        outlets carry it. Opinion and commentary never lead. There are no political bias scores and no personalization of the
+        default page.
       </p>
       <p>
         A world story is filed under the region its headlines name, not the region of the outlet that published it. A story that
@@ -184,7 +188,8 @@ export function AboutPage() {
         The Signal has no accounts, no cookies, no advertising and no analytics, and loads nothing from other sites. Your
         preferences (hidden sources and languages, display choices) are kept only in your own browser. The hosting provider
         processes the usual request logs, including IP addresses, to run and protect the service. A headline link takes you to
-        its publisher, whose own privacy policy applies there.
+        its publisher, whose own privacy policy applies there. Share uses your browser's own share sheet, or copies the
+        address; nothing is sent to The Signal or anyone else. Buy me a coffee opens buymeacoffee.com in a new tab.
       </p>
 
       <h2>Limits</h2>

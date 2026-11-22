@@ -8,7 +8,7 @@
 <copyright>Headlines, names and linked content belong to their publishers. Feed structure by The Signal.</copyright>
 <lastBuildDate>Sun, 22 Nov 2026 12:00:00 GMT</lastBuildDate>
 <docs>https://www.rssboard.org/rss-specification</docs>
-<generator>The Signal 0.1.0</generator>
+<generator>The Signal 0.1.1</generator>
 <ttl>30</ttl>
 <atom:link href="https://radmagelabs.com/signal/rss/trending.xml" rel="self" type="application/rss+xml"/>
 <item><title>Ocean treaty agreed at Orbis summit after all-night talks</title><link>https://rio-gazette.example/news/fx0009</link><guid isPermaLink="false">tag:radmagelabs.com,2026:signal:article:fx0009</guid><pubDate>Sun, 22 Nov 2026 06:24:00 GMT</pubDate><description>Rio Gazette, Brazil. One of 5 outlets in 5 countries covering this story: Brazil, Germany, India, Nigeria, United Kingdom.</description><category>World News</category><category>Africa &amp; the Americas</category><category>Brazil</category><source url="https://rio-gazette.example/feed.xml">Rio Gazette</source></item>

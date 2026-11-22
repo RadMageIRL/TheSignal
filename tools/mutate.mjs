@@ -70,8 +70,8 @@ const M = [
   ['4xx retried', 'ingest/fetch.ts', '(r.status >= 500 || r.status === 0)', '(r.status >= 400 || r.status === 0)'],
   ['run byte budget off', 'ingest/run.ts', 'if (spent() >= opts.maxBytesPerRun)', 'if (false)'],
   ["feed cap off", "ingest/run.ts", "  const tasks = due.slice(0, opts.maxFeeds);", "  const tasks = due;"],
-  ["wire filter off", "ingest/run.ts", "const kept = shown.filter((a) => !(a.wire && drop.has(a.wire.toLowerCase())) && !(paths.length > 0 && excludedPath(a.url, paths)));", "const kept = shown.filter((a) => !(paths.length > 0 && excludedPath(a.url, paths)));"],
-  ["path filter off", "ingest/run.ts", "const kept = shown.filter((a) => !(a.wire && drop.has(a.wire.toLowerCase())) && !(paths.length > 0 && excludedPath(a.url, paths)));", "const kept = shown.filter((a) => !(a.wire && drop.has(a.wire.toLowerCase())));"],
+  ["wire filter off", "ingest/run.ts", "!(a.wire && drop.has(a.wire.toLowerCase())) && !(paths.length", "!(paths.length"],
+  ["path filter off", "ingest/run.ts", " && !(paths.length > 0 && excludedPath(a.url, paths)) && !isSponsored", " && !isSponsored"],
   // Parsing, URLs, robots (Phase 0 guards)
   ['entity guard off', 'ingest/parse.ts', 'if (/<!ENTITY/i.test(xml.slice(0, 4096))) {', 'if (false) {'],
   ['truncation close off', 'ingest/parse.ts', '  if (opts.truncated) xml = closeTruncated(xml);', ''],
@@ -182,6 +182,14 @@ const M = [
   ["Labs rewrite load never compared", "tools/monitor.ts", "      if (extra > 2 * baseline.labsRewriteRequestsPerDay) {", "      if (false) {"],
   ["Labs daily usage compared on a short window", "tools/monitor.ts", "    if (hours < 24) { /* reported, not compared */ }", "    if (false) { /* reported, not compared */ }"],
   ["Labs cache miss not flagged", "tools/monitor.ts", "  if (labs.cached === false) {", "  if (false) {"],
+  // v0.1.1 editorial labels: sponsored items left out, labeled opinion ranks as opinion and never leads
+  ["sponsored items kept", "ingest/run.ts", " && !isSponsored(a.title));", ");"],
+  ["headline labels ignored in ranking", "shared/editorial.ts", "  return l === 'opinion' || l === 'commentary' ? l : a.contentType;", "  return a.contentType;"],
+  ["opinion may lead the page", "shared/layout.ts", " && !isOpinion(leadOf.get(c.id)!);", ";"],
+  ["labels read anywhere in a headline", "shared/editorial.ts", "  return new RegExp(`${start}|${end}`, 'i');", "  return new RegExp(`${words}`, 'i');"],
+  ["share sheet cancel copies anyway", "src/lib/share.ts", "      if ((e as { name?: string } | null)?.name === 'AbortError') return 'cancelled';", ""],
+  ["share claims a copy it never made", "src/lib/share.ts", "    await nav.clipboard!.writeText(SHARE_URL);\n", ""],
+  ["share ignores canShare", "src/lib/share.ts", " && (typeof nav.canShare !== 'function' || nav.canShare(data))", ""],
   ["weak ETag passed to conditional writes", "ingest/blob.ts", "etag: strongEtag(r.blob.etag)", "etag: r.blob.etag"],
   ["Labs usage counts every service as requests", "tools/monitor.ts", "filter((x) => x.product === 'edgeRequest')", "filter(() => true)"],
 ];

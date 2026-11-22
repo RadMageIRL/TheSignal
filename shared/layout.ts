@@ -4,7 +4,8 @@
 // Score = recency x (1 + 0.9 log2(1 + independent reports) + 0.5 log2(1 + countries)) x type factor
 // - recency halves every 10 hours, measured from the story's newest report;
 // - republished wire copy and syndicated copies count once ("independent reports");
-// - opinion and commentary lead news columns only at a discount;
+// - opinion and commentary lead news columns only at a discount, and never lead the page: by the source's
+//   type or by the publisher's own label on the headline (shared/editorial.ts);
 // - sports results, advice columns, programming notes and reviews rank lower (shared/topics.ts).
 // Diversity caps keep any one publisher or country from flooding a list.
 
@@ -12,6 +13,7 @@ import type { Article, Cluster, SectionId, Snapshot, Subsection } from './types.
 import { countOrigins, countryCountOf, pickLead } from './cluster.ts';
 import { isUsDomestic, regionOf } from './regions.ts';
 import { softFactor } from './topics.ts';
+import { effectiveType, isOpinion } from './editorial.ts';
 
 export const HALF_LIFE_HOURS = 10;
 
@@ -69,7 +71,7 @@ export function scoreCluster(c: Cluster, lead: Article, nowMs: number): number {
   const ageH = Math.max(0, (nowMs - Date.parse(c.lastSeen)) / 3600_000);
   const recency = Math.pow(0.5, ageH / HALF_LIFE_HOURS);
   const corroboration = 1 + 0.9 * Math.log2(1 + c.originCount) + 0.5 * Math.log2(1 + c.countryCount);
-  return recency * corroboration * (TYPE_FACTOR[lead.contentType] ?? 1) * softFactor(lead.title);
+  return recency * corroboration * (TYPE_FACTOR[effectiveType(lead)] ?? 1) * softFactor(lead.title);
 }
 
 /** The region most of a story's headlines name, if any names one. */
@@ -145,8 +147,9 @@ export function buildLayout(articles: Map<string, Article>, clusters: Cluster[],
   const ranked = [...live.values()].sort((a, b) => b.score - a.score || (a.id < b.id ? -1 : 1));
 
   // Lead story: the best-scoring news story that at least three independent reports from
-  // at least two countries carry within the last 12 hours; otherwise the best news story.
-  const isNews = (c: Cluster) => NEWS_SECTIONS.includes(placed.get(c.id)!.section);
+  // at least two countries carry within the last 12 hours; otherwise the best news story. A story
+  // whose lead headline is opinion or commentary (by source or by its own label) never leads.
+  const isNews = (c: Cluster) => NEWS_SECTIONS.includes(placed.get(c.id)!.section) && !isOpinion(leadOf.get(c.id)!);
   const fresh = (c: Cluster, h: number) => nowMs - Date.parse(c.lastSeen) <= h * 3600_000;
   const leadC = ranked.find((c) => isNews(c) && c.originCount >= 3 && c.countryCount >= 2 && fresh(c, 12))
     ?? ranked.find(isNews) ?? null;

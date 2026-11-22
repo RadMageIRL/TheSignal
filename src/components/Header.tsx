@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import type { WireSnapshot } from '../../shared/wire.ts';
 import { absoluteTime, longDate, relativeTime } from '../lib/time.ts';
 import { RssIcon } from './Rss.tsx';
+import { SupportLinks } from './Support.tsx';
 
 export const NAV: { id: string; label: string; href: string }[] = [
   { id: 'us', label: 'U.S. & Politics', href: '#us' },
@@ -69,6 +70,7 @@ export function TopBar(props: {
       <div className="topbar-left">
         <span className="today">{longDate(now)}</span>
         {props.wire && <Status wire={props.wire} nowMs={now} />}
+        <SupportLinks place="top" />
       </div>
       <div className="topbar-right">
         <form className="search" role="search" onSubmit={(e) => e.preventDefault()}>

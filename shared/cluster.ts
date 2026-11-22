@@ -10,6 +10,7 @@
 import type { Article, Cluster } from './types.ts';
 import { PLACE_TOKENS, canonicalPlace } from './places.ts';
 import { stem } from './stem.ts';
+import { effectiveType } from './editorial.ts';
 
 const STOP = new Set((
   'a an the and or but nor so yet of to in on at by for from with without into onto over under about above below after before ' +
@@ -280,7 +281,7 @@ const LEAD_TYPE_ORDER: Record<string, number> = {
 /** The lead headline is the earliest straight-news report; commentary only leads if nothing else does. */
 export function pickLead(arts: Article[]): Article {
   return [...arts].sort((x, y) =>
-    (LEAD_TYPE_ORDER[x.contentType] ?? 9) - (LEAD_TYPE_ORDER[y.contentType] ?? 9)
+    (LEAD_TYPE_ORDER[effectiveType(x)] ?? 9) - (LEAD_TYPE_ORDER[effectiveType(y)] ?? 9)
     || timeOf(x) - timeOf(y)
     || (x.id < y.id ? -1 : 1))[0]!;
 }

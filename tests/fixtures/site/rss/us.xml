@@ -8,7 +8,7 @@
 <copyright>Headlines, names and linked content belong to their publishers. Feed structure by The Signal.</copyright>
 <lastBuildDate>Sun, 22 Nov 2026 12:00:00 GMT</lastBuildDate>
 <docs>https://www.rssboard.org/rss-specification</docs>
-<generator>The Signal 0.1.0</generator>
+<generator>The Signal 0.1.1</generator>
 <ttl>30</ttl>
 <atom:link href="https://radmagelabs.com/signal/rss/us.xml" rel="self" type="application/rss+xml"/>
 <item><title>Senate passes Harlow infrastructure bill after late vote</title><link>https://capitol-ledger.example/news/fx0016</link><guid isPermaLink="false">tag:radmagelabs.com,2026:signal:article:fx0016</guid><pubDate>Sun, 22 Nov 2026 10:30:00 GMT</pubDate><description>The Capitol Ledger, United States.</description><category>U.S. &amp; Politics</category><category>Washington</category><category>United States</category><source url="https://capitol-ledger.example/feed.xml">The Capitol Ledger</source></item>

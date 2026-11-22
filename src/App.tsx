@@ -7,6 +7,7 @@ import { Breaking, Lead, NewsColumn, PerspectivesBand, Trending } from './compon
 import { PreferencesPanel, SearchResults } from './components/Panels.tsx';
 import { AboutPage, REPOSITORY, SourcesPage } from './components/Pages.tsx';
 import { FeedsPage } from './components/Feeds.tsx';
+import { SupportLinks } from './components/Support.tsx';
 import { DEFAULT_FILTERS, type SearchFilters } from './lib/search.ts';
 import type { Ctx } from './components/Story.tsx';
 import { IDENTITY } from '../shared/identity.ts';
@@ -119,6 +120,7 @@ export function App() {
               <li><button type="button" className="text-btn" onClick={() => setPrefsOpen(true)}>Preferences</button></li>
               <li><a href={REPOSITORY} rel="noopener noreferrer">Source code</a></li>
               <li><a href="https://radmagelabs.com/">RadMage Labs</a></li>
+              <li><SupportLinks place="footer" /></li>
             </ul>
           </div>
           {data && <p className="footer-small">Snapshot {data.wire.generatedAt.replace('T', ' ').slice(0, 16)} UTC. {data.wire.stats.sourcesOk} of {data.wire.stats.sourcesAttempted} sources answered.</p>}

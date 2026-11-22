@@ -15,7 +15,7 @@ All signal. No noise.
 
 ## Status
 
-v0.1.0, released 2026-11-22: the site, its collector and its RSS feeds are public at
+v0.1.1, released 2026-11-22 (first release v0.1.0 the same day): the site, its collector and its RSS feeds are public at
 [radmagelabs.com/signal/](https://radmagelabs.com/signal/). Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## What it shows

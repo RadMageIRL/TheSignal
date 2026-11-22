@@ -17,6 +17,7 @@ import { DEFAULT_USER_AGENT, ROBOTS_TOKEN, userAgentFor } from '../shared/identi
 import { DEFAULT_CONTROLS, type Controls } from './controls.ts';
 import { CRAWL_DELAY_MAX_WAIT_MS, createRobotsGate, type RobotsCacheEntry } from './robots.ts';
 import { isEnglish } from '../shared/languages.ts';
+import { isSponsored } from '../shared/editorial.ts';
 import {
   CARRY_MS, COOL_DOWN_MS, DATE_SKEW_MS, DUE_WAIT_MS, MAX_STORED_ITEMS, RETRY_AFTER_MAX_MS,
   backoffMs, earliestRequest, feedKey, retryAfterMs, type CollectorState, type FeedState,
@@ -419,7 +420,8 @@ export async function collect(sources: SourceEntry[], opts: RunOptions): Promise
 
     const drop = new Set((t.s.filters?.dropWires ?? []).map((w) => w.toLowerCase()));
     const paths = t.s.filters?.excludePaths ?? [];
-    const kept = shown.filter((a) => !(a.wire && drop.has(a.wire.toLowerCase())) && !(paths.length > 0 && excludedPath(a.url, paths)));
+    // Items the publisher labels as sponsored or paid content are advertising, not journalism: left out.
+    const kept = shown.filter((a) => !(a.wire && drop.has(a.wire.toLowerCase())) && !(paths.length > 0 && excludedPath(a.url, paths)) && !isSponsored(a.title));
     const next = earliestRequest(state ? fs : undefined, t.s.intervalMinutes);
     const rep: FeedReport = {
       sourceId: t.s.id, feed: t.f.url, outcome: fr.outcome, requests: fr.requests, bytes: fr.bytes ?? 0, status: fr.status,

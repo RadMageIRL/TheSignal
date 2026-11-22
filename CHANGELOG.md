@@ -2,6 +2,25 @@
 
 All notable changes to The Signal are recorded here.
 
+## 0.1.1 (2026-11-22)
+
+### Added
+
+- Share, in the top bar and the footer: the browser's own share sheet where there is one, otherwise the address
+  https://radmagelabs.com/signal/ is copied and the page says so (or shows it to copy by hand). No third-party code.
+- Buy me a coffee links in the top bar and the footer, to the RadMage Labs support page.
+
+### Changed
+
+- A headline its publisher labels as opinion or commentary ("Opinion:", "Commentary |", "... - opinion") ranks as
+  opinion or commentary even when it arrives in a news feed, and opinion and commentary never become the lead story.
+  They still appear in their columns. Only a label at the start or end of a headline counts.
+- Items their publisher labels as sponsored or paid content ("Sponsored Commentary:", "Paid Post:", "[Sponsored]") are
+  left out of the page and the feeds.
+- The methodology page states these rules, and how the lead story is chosen before any story is carried by outlets in
+  two countries.
+- The production runtime is pinned to Node.js 24, the version the tests run on.
+
 ## 0.1.0 (2026-11-22)
 
 First public release, at https://radmagelabs.com/signal/.

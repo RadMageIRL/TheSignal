@@ -171,6 +171,21 @@ describe('collection limits', () => {
     expect(snapshot.articles).toHaveLength(0);
   });
 
+  it('leaves out items the publisher labels as sponsored, from every source, and keeps headlines that only mention sponsorship', async () => {
+    const srcs = fixtureSources().slice(0, 1);
+    const feed = (url: string) => {
+      const host = new URL(url).hostname;
+      const items = [
+        ['Sponsored Commentary: Immigrant talent powers the American economy', 0],
+        ['Senate passes a bill sponsored by Smith on harbor dredging', 1],
+        ['Opinion: The harbor plan is a mistake', 2],
+      ].map(([t, i]) => `<item><title>${t}</title><link>https://${host}/news/${i}</link><pubDate>Sun, 22 Nov 2026 1${i}:00:00 GMT</pubDate></item>`).join('');
+      return ok(url, `<?xml version="1.0"?><rss version="2.0"><channel><title>${host}</title><link>https://${host}/</link>${items}</channel></rss>`);
+    };
+    const { snapshot } = await collect(srcs, { ...opts(), fetcher: fakeNet(feed).fetcher });
+    expect(snapshot.articles.map((a) => a.title).sort()).toEqual(['Opinion: The harbor plan is a mistake', 'Senate passes a bill sponsored by Smith on harbor dredging']);
+  });
+
   it('leaves out items under an excluded path and keeps the rest', async () => {
     expect(excludedPath('https://x.example/newswire/2026/a', ['/newswire/'])).toBe(true);
     expect(excludedPath('https://x.example/news/2026/a', ['/newswire/'])).toBe(false);

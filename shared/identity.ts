@@ -5,7 +5,7 @@
 export const IDENTITY = {
   organization: 'RadMage Labs',
   application: 'The Signal',
-  version: '0.1.0',
+  version: '0.1.1',
   contact: 'radmageirl@radmagelabs.com',
   website: 'https://radmagelabs.com/signal/',
 } as const;

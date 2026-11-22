@@ -1,11 +1,11 @@
 {
   "name": "the-signal",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "The Signal: a global news and media headline aggregator. One world. Many perspectives. Draw your own conclusions.",
   "type": "module",
   "engines": {
-    "node": ">=24"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "vite",

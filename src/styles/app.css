@@ -387,6 +387,16 @@ abbr.cc { cursor: help; }
 .footer-links a { color: var(--ink-2); font-weight: 600; }
 .footer-small { margin: 10px 0 0; font-size: 11.5px; }
 
+/* ---------- share and support (top bar and footer) ---------- */
+.support { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; min-width: 0; }
+.support .text-btn, .support-coffee {
+  font: inherit; font-weight: 600; color: var(--ink-2); text-decoration: underline; text-underline-offset: 2px;
+}
+.support .text-btn:hover, .support-coffee:hover { color: var(--hover); }
+.support-sep { color: var(--muted); }
+.support-status { color: var(--ink-2); overflow-wrap: anywhere; }
+.support-status:empty { display: none; }
+
 /* ---------- responsive ---------- */
 @media (max-width: 1080px) {
   .grid3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }

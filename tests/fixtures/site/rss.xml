@@ -8,7 +8,7 @@
 <copyright>Headlines, names and linked content belong to their publishers. Feed structure by The Signal.</copyright>
 <lastBuildDate>Sun, 22 Nov 2026 12:00:00 GMT</lastBuildDate>
 <docs>https://www.rssboard.org/rss-specification</docs>
-<generator>The Signal 0.1.0</generator>
+<generator>The Signal 0.1.1</generator>
 <ttl>30</ttl>
 <atom:link href="https://radmagelabs.com/signal/rss.xml" rel="self" type="application/rss+xml"/>
 <item><title>Stocks edge higher as bond yields fall</title><link>https://ledger-markets.example/news/fx0021</link><guid isPermaLink="false">tag:radmagelabs.com,2026:signal:article:fx0021</guid><pubDate>Sun, 22 Nov 2026 11:12:00 GMT</pubDate><description>Ledger Markets, United States.</description><category>Markets &amp; Technology</category><category>Global Markets</category><category>United States</category><source url="https://ledger-markets.example/feed.xml">Ledger Markets</source></item>
