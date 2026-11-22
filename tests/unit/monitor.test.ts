@@ -58,6 +58,21 @@ describe('48-hour monitoring checkpoints', () => {
     expect(projectUsage([{ project: 'the-signal', cost: 0.07 }], 'the-signal')).toEqual({ cost: 0.07, requests: null });
   });
 
+  it('reads the grouped form the CLI prints, counting only the CDN request service', () => {
+    const cli = { groupBy: { dimension: 'project', data: [
+      { name: 'radmagelabs-com', totals: { cost: 0.35 }, services: [
+        { name: 'CDN Requests - Additional CPU Duration', product: 'edgeRequestAdditionalCpuDuration', quantity: 0.0086, cost: 0.0026 },
+        { name: 'CDN Requests', product: 'edgeRequest', quantity: 33130, cost: 0 },
+        { name: 'Fast Data Transfer', product: 'fastDataTransfer', quantity: 0.7, cost: 0 },
+      ] },
+      { name: 'the-signal', totals: { cost: 0.02 }, services: [{ name: 'Fluid Active CPU', product: 'fluidCpuDuration', quantity: 0.01, cost: 0.02 }] },
+    ] } };
+    expect(projectUsage(cli, 'radmagelabs-com')).toEqual({ cost: 0.35, requests: 33130 });
+    expect(projectUsage(cli, 'the-signal')).toEqual({ cost: 0.02, requests: null });
+    expect(projectUsage(cli, 'missing')).toEqual({ cost: null, requests: null });
+    expect(projectCost(cli, 'the-signal')).toBe(0.02);
+  });
+
   it('tells a cached repeat request from one that reached the origin again', async () => {
     const answer = (states: string[]) => { let i = 0; return async () => new Response('{}', { headers: states[i] ? { 'x-vercel-cache': states[i++]! } : {} }); };
     expect(await repeatIsCached(answer(['MISS', 'HIT']), 'https://radmagelabs.com/signal/')).toBe(true);

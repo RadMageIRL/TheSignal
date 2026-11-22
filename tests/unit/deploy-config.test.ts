@@ -49,6 +49,14 @@ describe('the generated vercel.json', () => {
     expect(bare).toBeLessThan(cfg.rewrites.findIndex((r) => r.source === '/signal/:path*'));
   });
 
+  it('asks search engines to skip the project address and names radmagelabs.com/signal/ as canonical', () => {
+    // public/robots.txt lands at the root of the project address only; radmagelabs.com/robots.txt is the Labs site's.
+    const robots = readFileSync('public/robots.txt', 'utf8');
+    expect(robots).toMatch(/^User-agent: \*$/m);
+    expect(robots).toMatch(/^Disallow: \/$/m);
+    expect(INDEX).toContain('<link rel="canonical" href="https://radmagelabs.com/signal/"');
+  });
+
   it('runs the collector every 15 minutes with a bounded duration', () => {
     expect(cfg.crons).toEqual([{ path: '/api/collect', schedule: '*/15 * * * *' }]);
     expect(cfg.functions['api/collect.ts'].maxDuration).toBeLessThanOrEqual(180);

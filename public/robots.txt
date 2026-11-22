@@ -1,0 +1,5 @@
+# Served only at the project's own Vercel address, the origin behind https://radmagelabs.com/signal/.
+# That address is not meant to be indexed: the site's canonical address is https://radmagelabs.com/signal/,
+# whose robots.txt is radmagelabs.com's own.
+User-agent: *
+Disallow: /

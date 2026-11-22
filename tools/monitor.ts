@@ -99,8 +99,23 @@ function usageRows(json: unknown): Record<string, unknown>[] | null {
   return Array.isArray(rows) ? (rows as Record<string, unknown>[]) : null;
 }
 
-/** A project's billed amount and edge request count from `vercel billing usage --group-by project --json`. */
+interface UsageService { name?: string; product?: string; quantity?: number; cost?: number }
+interface UsageGroup { name?: string; services?: UsageService[]; totals?: { cost?: number } }
+
+/**
+ * A project's billed amount and CDN request count from `vercel billing usage --group-by project --json`.
+ * The CLI (65.12) answers { groupBy: { data: [{ name, services: [{ name, product, quantity, cost }], totals }] } };
+ * CDN requests are the service with product "edgeRequest". Flat row lists are read as a fallback.
+ */
 export function projectUsage(json: unknown, project: string): Usage {
+  const groups = (json as { groupBy?: { data?: UsageGroup[] } } | null)?.groupBy?.data;
+  if (Array.isArray(groups)) {
+    const g = groups.find((x) => x.name === project);
+    if (!g) return { cost: null, requests: null };
+    const cost = Number(g.totals?.cost ?? (g.services ?? []).reduce((s, x) => s + Number(x.cost ?? 0), 0));
+    const req = (g.services ?? []).filter((x) => x.product === 'edgeRequest').map((x) => Number(x.quantity));
+    return { cost: Number.isFinite(cost) ? cost : null, requests: req.length > 0 && req.every(Number.isFinite) ? req.reduce((a, b) => a + b, 0) : null };
+  }
   const rows = usageRows(json);
   if (!rows) return { cost: null, requests: null };
   let cost = 0; let costFound = false; let requests = 0; let requestsFound = false;
@@ -134,7 +149,7 @@ export async function repeatIsCached(get: (u: string) => Promise<Response>, base
 }
 
 function billingUsage(hours: number): unknown {
-  const r = spawnSync('npx', ['--yes', 'vercel@65.12.1', 'billing', 'usage', '--since', `${hours}h`, '--group-by', 'project', '--json'], { encoding: 'utf8', shell: true, env: { ...process.env, VERCEL_TELEMETRY_DISABLED: '1' } });
+  const r = spawnSync('npx', ['--yes', 'vercel@65.12.1', 'billing', 'usage', '--since', `${hours}h`, '--scope', 'radmageirls-projects', '--group-by', 'project', '--json'], { encoding: 'utf8', shell: true, env: { ...process.env, VERCEL_TELEMETRY_DISABLED: '1' } });
   try { return JSON.parse(r.stdout); } catch { return { error: (r.stderr || r.stdout).slice(0, 400) }; }
 }
 
